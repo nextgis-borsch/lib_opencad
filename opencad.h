@@ -52,7 +52,7 @@
 
 #ifndef OCAD_EXTERN
 #ifdef OCAD_STATIC
-  #define OCAD_EXTERN extern "C"
+  #define OCAD_EXTERN 
 #else
 #   if defined (_WIN32) || defined (WINDOWS)
 #    ifdef OCAD_EXPORTS
