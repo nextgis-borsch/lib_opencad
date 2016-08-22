@@ -28,6 +28,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
+
 #ifndef CADDICTIONARY_H
 #define CADDICTIONARY_H
 
@@ -38,9 +39,6 @@
 
 using namespace std;
 
-/*
- * @brief Base-class for XRecord and Dictionary.
- */
 class CADDictionaryRecord
 {
 public:
@@ -52,14 +50,11 @@ protected:
     CADObject::ObjectType objType;
 };
 
-/*
- * @brief Class which implements XRecord
- */
 class OCAD_EXTERN CADXRecord : public CADDictionaryRecord
 {
 public:
     CADXRecord();
-
+    
     const string&           getRecordData() const;
     void                    setRecordData( const string& data );
 
@@ -67,9 +62,6 @@ private:
     string                  sRecordData;
 };
 
-/*
- * @brief Class which implements Dictionary
- */
 class OCAD_EXTERN CADDictionary : public CADDictionaryRecord
 {
 public:

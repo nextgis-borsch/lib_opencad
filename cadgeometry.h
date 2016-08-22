@@ -28,6 +28,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
+
 #ifndef CADGEOMETRIES_H
 #define CADGEOMETRIES_H
 
@@ -39,7 +40,6 @@
 using namespace std;
 
 class CADAttdef;
-
 class CADAttrib;
 
 /**
@@ -48,11 +48,11 @@ class CADAttrib;
 class Matrix
 {
 public:
-              Matrix();
-    void      translate( const CADVector& vector );
-    void      rotate( double rotation );
-    void      scale( const CADVector& vector );
-    CADVector multiply( const CADVector& vector ) const;
+    Matrix();
+    void        translate(const CADVector &vector);
+    void        rotate(double rotation);
+    void        scale(const CADVector &vector);
+    CADVector   multiply(const CADVector &vector) const;
 protected:
     array<double, 9> matrix;
 };
@@ -62,7 +62,7 @@ protected:
  */
 class CADGeometry
 {
-public:
+ public:
     CADGeometry();
     virtual ~CADGeometry();
     /**
@@ -93,39 +93,27 @@ public:
         ATTDEF
     };
 
-    enum GeometryType getType() const;
-    double            getThickness() const;
-    void              setThickness( double thicknes );
-    RGBColor          getColor() const;
-    void              setColor( RGBColor color );// TODO: in 2004+ ACI is not the only way to set the color.
+    enum GeometryType   getType() const;
+    double              getThickness() const;
+    void                setThickness(double thicknes);
+    RGBColor            getColor() const;
+    void                setColor(int ACIColorIndex);// TODO: in 2004+ ACI is not the only way to set the color.
 
-    vector<CADAttrib> getBlockAttributes() const;
-    void              setBlockAttributes( const vector<CADAttrib>& value );
+    vector< CADAttrib > getBlockAttributes() const;
+    void                setBlockAttributes(const vector< CADAttrib >& value);
 
-    vector<string> getEED() const;
-    void           setEED( vector<string> eed );
+    vector< string >    getEED() const;
+    void                setEED(vector< string > eed);
 
-    virtual void print() const                     = 0;
-    virtual void transform( const Matrix& matrix ) = 0;
+    virtual void        print () const = 0;
+    virtual void        transform(const Matrix& matrix) = 0;
 protected:
-    vector<CADAttrib> blockAttributes; // attributes of block reference this geometry is attached to.
+    vector< CADAttrib > blockAttributes; // attributes of block reference this geometry is attached to.
 
-    vector<string>    asEED;
-    enum GeometryType geometryType;
-    double            thickness;
-    RGBColor          geometry_color;
-};
-
-/**
- * @brief Geometry class which represents Unhandled geometry (means that library cant read it yet)
- */
-class CADUnknown : public CADGeometry
-{
-public:
-    CADUnknown();
-
-    virtual void print() const override;
-    void         transform( const Matrix& matrix ) override;
+    vector< string >    asEED;
+    enum GeometryType   geometryType;
+    double              thickness;
+    RGBColor            geometry_color;
 };
 
 /**
@@ -134,23 +122,23 @@ public:
 class CADPoint3D : public CADGeometry
 {
 public:
-              CADPoint3D();
-              CADPoint3D( const CADVector& positionIn, double thicknessIn );
-    CADVector getPosition() const;
-    void      setPosition( const CADVector& value );
+    CADPoint3D ();
+    CADPoint3D (const CADVector &positionIn, double thicknessIn);
+    CADVector           getPosition() const;
+    void                setPosition(const CADVector &value);
 
-    CADVector getExtrusion() const;
-    void      setExtrusion( const CADVector& value );
+    CADVector           getExtrusion() const;
+    void                setExtrusion(const CADVector &value);
 
-    double getXAxisAng() const;
-    void   setXAxisAng( double value );
+    double              getXAxisAng() const;
+    void                setXAxisAng(double value);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    CADVector position;
-    CADVector extrusion;
-    double    xAxisAng;
+    CADVector           position;
+    CADVector           extrusion;
+    double              xAxisAng;
 };
 
 /**
@@ -160,20 +148,21 @@ class CADLine : public CADGeometry
 {
 public:
     CADLine();
-    CADLine( const CADPoint3D& startIn, const CADPoint3D& endIn );
+    CADLine(const CADPoint3D& startIn, const CADPoint3D& endIn);
 
-    CADPoint3D getStart() const;
-    void       setStart( const CADPoint3D& value );
+    CADPoint3D          getStart() const;
+    void                setStart(const CADPoint3D &value);
 
-    CADPoint3D getEnd() const;
-    void       setEnd( const CADPoint3D& value );
+    CADPoint3D          getEnd() const;
+    void                setEnd(const CADPoint3D &value);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    CADPoint3D start;
-    CADPoint3D end;
+    CADPoint3D          start;
+    CADPoint3D          end;
 };
+
 
 /**
  * @brief Geometry class which represents Polyline 3D
@@ -183,14 +172,14 @@ class CADPolyline3D : public CADGeometry
 public:
     CADPolyline3D();
 
-    void   addVertex( const CADVector& vertex );
-    size_t getVertexCount() const;
-    CADVector& getVertex( size_t index );
+    void                addVertex(const CADVector& vertex);
+    size_t              getVertexCount() const;
+    CADVector&          getVertex(size_t index);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    vector<CADVector> vertexes;
+    vector<CADVector>   vertexes;
 };
 
 /**
@@ -200,34 +189,34 @@ protected:
 class CADLWPolyline : public CADPolyline3D
 {
 public:
-    CADLWPolyline();
+    CADLWPolyline ();
 
-    double getConstWidth() const;
-    void   setConstWidth( double value );
+    double                        getConstWidth() const;
+    void                          setConstWidth(double value);
 
-    double getElevation() const;
-    void   setElevation( double value );
+    double                        getElevation() const;
+    void                          setElevation(double value);
 
-    CADVector getVectExtrusion() const;
-    void      setVectExtrusion( const CADVector& value );
+    CADVector                     getVectExtrusion() const;
+    void                          setVectExtrusion(const CADVector& value);
 
     vector<pair<double, double> > getWidths() const;
-    void                          setWidths( const vector<pair<double, double> >& value );
+    void                          setWidths(const vector<pair<double, double> >& value);
 
-    vector<double> getBulges() const;
-    void           setBulges( const vector<double>& value );
-
-    bool isClosed() const;
-    void setClosed( bool state );
-
-    virtual void print() const override;
+    vector<double>                getBulges() const;
+    void                          setBulges(const vector<double>& value);
+    
+    bool                          isClosed() const;
+    void                          setClosed(bool state);
+    
+    virtual void                  print () const override;
 protected:
-    bool                          bClosed;
-    double                        constWidth;
-    double                        elevation;
-    CADVector                     vectExtrusion;
-    vector<double>                bulges;
-    vector<pair<double, double> > widths; // start, end.
+    bool                             bClosed;
+    double                           constWidth;
+    double                           elevation;
+    CADVector                        vectExtrusion;
+    vector<double>                   bulges;
+    vector< pair< double, double > > widths; // start, end.
 };
 
 /**
@@ -236,14 +225,14 @@ protected:
 class CADCircle : public CADPoint3D
 {
 public:
-    CADCircle();
+    CADCircle ();
 
-    double getRadius() const;
-    void   setRadius( double value );
+    double              getRadius() const;
+    void                setRadius(double value);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    double radius;
+    double              radius;
 };
 
 /**
@@ -254,24 +243,24 @@ class CADText : public CADPoint3D
 public:
     CADText();
 
-    string getTextValue() const;
-    void   setTextValue( const string& value );
+    string              getTextValue() const;
+    void                setTextValue(const string &value);
 
-    double getHeight() const;
-    void   setHeight( double value );
+    double              getHeight() const;
+    void                setHeight(double value);
 
-    double getRotationAngle() const;
-    void   setRotationAngle( double value );
+    double              getRotationAngle() const;
+    void                setRotationAngle(double value);
 
-    double getObliqueAngle() const;
-    void   setObliqueAngle( double value );
+    double              getObliqueAngle() const;
+    void                setObliqueAngle(double value);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    double obliqueAngle;
-    double rotationAngle;
-    double height;
-    string textValue;
+    double              obliqueAngle;
+    double              rotationAngle;
+    double              height;
+    string              textValue;
 };
 
 /**
@@ -282,16 +271,16 @@ class CADArc : public CADCircle
 public:
     CADArc();
 
-    double getStartingAngle() const;
-    void   setStartingAngle( double value );
+    double              getStartingAngle() const;
+    void                setStartingAngle(double value);
 
-    double getEndingAngle() const;
-    void   setEndingAngle( double value );
+    double              getEndingAngle() const;
+    void                setEndingAngle(double value);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    double startingAngle;
-    double endingAngle;
+    double              startingAngle;
+    double              endingAngle;
 };
 
 /**
@@ -302,16 +291,16 @@ class CADEllipse : public CADArc
 public:
     CADEllipse();
 
-    double getAxisRatio() const;
-    void   setAxisRatio( double value );
+    double              getAxisRatio() const;
+    void                setAxisRatio(double value);
 
-    CADVector getSMAxis();
-    void      setSMAxis( const CADVector& vectSMA );
+    CADVector           getSMAxis();
+    void                setSMAxis(const CADVector& vectSMA);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    CADVector vectSMAxis;
-    double    axisRatio;
+    CADVector           vectSMAxis;
+    double              axisRatio;
 };
 
 /**
@@ -322,45 +311,45 @@ class CADSpline : public CADGeometry
 public:
     CADSpline();
 
-    long getScenario() const;
-    void setScenario( long value );
+    long                getScenario() const;
+    void                setScenario(long value);
 
-    bool isRational() const;
-    void setRational( bool value );
+    bool                isRational() const;
+    void                setRational(bool value);
 
-    bool isClosed() const;
-    void setClosed( bool value );
+    bool                isClosed() const;
+    void                setClosed(bool value);
 
-    vector<CADVector>& getControlPoints();
-    vector<CADVector>& getFitPoints();
-    vector<double>   & getControlPointsWeights();
+    vector<CADVector>&  getControlPoints();
+    vector<CADVector>&  getFitPoints();
+    vector<double>&     getControlPointsWeights();
 
-    void addControlPointsWeight( double p_weight );
-    void addControlPoint( const CADVector& point );
-    void addFitPoint( const CADVector& point );
+    void                addControlPointsWeight(double weight);
+    void                addControlPoint(const CADVector& point);
+    void                addFitPoint(const CADVector& point);
+    
+    bool                getWeight() const;
+    void                setWeight(bool value);
 
-    bool getWeight() const;
-    void setWeight( bool value );
+    double              getFitTollerance() const;
+    void                setFitTollerance(double value);
 
-    double getFitTollerance() const;
-    void   setFitTollerance( double value );
+    long                getDegree() const;
+    void                setDegree(long value);
 
-    long getDegree() const;
-    void setDegree( long value );
-
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    long   scenario;
-    bool   rational;
-    bool   closed;
-    bool   weight;
-    double fitTollerance;
-    long   degree;
+    long                scenario;
+    bool                rational;
+    bool                closed;
+    bool                weight;
+    double              fitTollerance;
+    long                degree;
 
-    vector<double>    ctrlPointsWeight;
-    vector<CADVector> avertCtrlPoints;
-    vector<CADVector> averFitPoints;
+    vector < double >    ctrlPointsWeight;
+    vector < CADVector > avertCtrlPoints;
+    vector < CADVector > averFitPoints;
 };
 
 /**
@@ -370,17 +359,16 @@ class CADSolid : public CADPoint3D
 {
 public:
     CADSolid();
+    
+    double              getElevation() const;
+    void                setElevation(double value);
+    void                addAverCorner(const CADVector& corner);
 
-    double getElevation() const;
-    void   setElevation( double value );
-    void   addCorner( const CADVector& corner );
-    vector<CADVector> getCorners();
-
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    double            elevation;
-    vector<CADVector> avertCorners;
+    double               elevation;
+    vector < CADVector > avertCorners;
 };
 
 /**
@@ -391,10 +379,10 @@ class CADRay : public CADPoint3D
 public:
     CADRay();
 
-    CADVector getVectVector() const;
-    void      setVectVector( const CADVector& value );
+    CADVector           getVectVector() const;
+    void                setVectVector(const CADVector &value);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 };
 
 /**
@@ -412,66 +400,59 @@ public:
 class CADImage : public CADGeometry
 {
 public:
-    /**
-     * @brief enum which describes in which units Image resolutions is present 
-     */
-    enum ResolutionUnit
-    {
-        NONE = 0, CENTIMETER = 2, INCH = 5
-    };
-
     CADImage();
 
-    CADVector getVertInsertionPoint() const;
-    void      setVertInsertionPoint( const CADVector& value );
+    CADVector           getVertInsertionPoint() const;
+    void                setVertInsertionPoint(const CADVector &value);
 
-    CADVector getImageSize() const;
-    void      setImageSize( const CADVector& value );
+    CADVector           getImageSize() const;
+    void                setImageSize(const CADVector &value);
 
-    CADVector getImageSizeInPx() const;
-    void      setImageSizeInPx( const CADVector& value );
 
-    CADVector getPixelSizeInACADUnits() const;
-    void      setPixelSizeInACADUnits( const CADVector& value );
+    CADVector           getImageSizeInPx() const;
+    void                setImageSizeInPx(const CADVector &value);
 
-    short getClippingBoundaryType() const;
-    void  setClippingBoundaryType( short value );
+    CADVector           getPixelSizeInACADUnits() const;
+    void                setPixelSizeInACADUnits(const CADVector &value);
 
-    enum ResolutionUnit getResolutionUnits() const;
-    void                setResolutionUnits( enum ResolutionUnit value );
+    short               getClippingBoundaryType() const;
+    void                setClippingBoundaryType(short value);
 
-    string getFilePath() const;
-    void   setFilePath( const string& value );
+    unsigned char       getResolutionUnits() const;
+    void                setResolutionUnits(unsigned char value);
 
-    void setOptions( bool transparency, bool clip, unsigned char brightness, unsigned char contrast );
+    string              getFilePath() const;
+    void                setFilePath(const string &value);
 
-    void addClippingPoint( const CADVector& pt );
+    void                setOptions(bool transparency, bool clip,
+                                    unsigned char brightness, unsigned char contrast);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    void                addClippingPoint(const CADVector &pt);
+
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    CADVector     vertInsertionPoint;
+    CADVector           vertInsertionPoint;
     //CADVector vectUDirection;
     //CADVector vectVDirection;
-    CADVector     imageSize;
+    CADVector           imageSize;
     //bool bShow;
     //bool bShowWhenNotAlignedWithScreen;
     //bool bUseClippingBoundary;
-    bool          bTransparency;
-    bool          bClipping;
-    unsigned char dBrightness;
-    unsigned char dContrast;
+    bool                bTransparency;
+    bool                bClipping;
+    unsigned char       dBrightness;
+    unsigned char       dContrast;
     //char dFade;
 
     CADVector           imageSizeInPx;
     string              filePath;
     //bool bIsLoaded;
-    enum ResolutionUnit resolutionUnits;
-    //unsigned char       resolutionUnit; // 0 == none, 2 == centimeters, 5 == inches;
+    unsigned char       resolutionUnits; // 0 == none, 2 == centimeters, 5 == inches;
     CADVector           pixelSizeInACADUnits;
 
-    short             clippingBoundaryType; // 1 == rect, 2 == polygon
-    vector<CADVector> avertClippingPolygon;
+    short               clippingBoundaryType; // 1 == rect, 2 == polygon
+    vector< CADVector > avertClippingPolygon;
 };
 
 /**
@@ -482,20 +463,20 @@ class CADMText : public CADText
 public:
     CADMText();
 
-    double getRectWidth() const;
-    void   setRectWidth( double value );
+    double              getRectWidth() const;
+    void                setRectWidth(double value);
 
-    double getExtents() const;
-    void   setExtents( double value );
+    double              getExtents() const;
+    void                setExtents(double value);
 
-    double getExtentsWidth() const;
-    void   setExtentsWidth( double value );
+    double              getExtentsWidth() const;
+    void                setExtentsWidth(double value);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    double rectWidth;
-    double extents;
-    double extentsWidth;
+    double              rectWidth;
+    double              extents;
+    double              extentsWidth;
     // TODO: do we need this here?
     //short dDrawingDir;
     //short dLineSpacingStyle;
@@ -514,17 +495,17 @@ class CADFace3D : public CADGeometry
 public:
     CADFace3D();
 
-    void      addCorner( const CADVector& corner );
-    CADVector getCorner( size_t index );
+    void                addCorner(const CADVector &corner);
+    CADVector           getCorner(size_t index);
 
-    short getInvisFlags() const;
-    void  setInvisFlags( short value );
+    short               getInvisFlags() const;
+    void                setInvisFlags(short value);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    vector<CADVector> avertCorners;
-    short             invisFlags;
+    vector< CADVector > avertCorners;
+    short               invisFlags;
 };
 
 /**
@@ -535,12 +516,12 @@ class CADPolylinePFace : public CADGeometry
 public:
     CADPolylinePFace();
 
-    void addVertex( const CADVector& vertex );
+    void                addVertex(const CADVector& vertex);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    vector<CADVector> vertexes;
+    vector< CADVector > vertexes;
 };
 
 /**
@@ -551,7 +532,7 @@ class CADXLine : public CADRay
 public:
     CADXLine();
 
-    virtual void print() const override;
+    virtual void        print () const override;
 };
 
 /**
@@ -561,23 +542,23 @@ class CADMLine : public CADPoint3D
 {
 public:
     CADMLine();
+    
+    double              getScale() const;
+    void                setScale(double value);
 
-    double getScale() const;
-    void   setScale( double value );
+    bool                isOpened() const;
+    void                setOpened(bool value);
 
-    bool isOpened() const;
-    void setOpened( bool value );
+    void                addVertex(const CADVector& vertex);
 
-    void addVertex( const CADVector& vertex );
-
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    double            scale;
+    double              scale;
     //char dJust;
-    bool              opened; // 1 == open, 0 == close
+    bool                opened; // 1 == open, 0 == close
     // TODO: do we need more properties here?
-    vector<CADVector> avertVertexes;
+    vector< CADVector > avertVertexes;
 };
 
 /**
@@ -588,25 +569,25 @@ class CADAttrib : public CADText
 public:
     CADAttrib();
 
-    double getElevation() const;
-    void   setElevation( double );
+    double              getElevation() const;
+    void                setElevation(double);
 
-    string getTag() const;
-    void   setTag( const string& );
+    string              getTag() const;
+    void                setTag(const string&);
 
-    CADVector getAlignmentPoint() const;
-    void      setAlignmentPoint( const CADVector& );
+    CADVector           getAlignmentPoint() const;
+    void                setAlignmentPoint(const CADVector&);
 
-    bool isPositionLocked() const;
-    void setPositionLocked( bool );
+    bool                isPositionLocked() const;
+    void                setPositionLocked(bool);
 
-    virtual void print() const override;
-    virtual void transform( const Matrix& matrix ) override;
+    virtual void        print () const override;
+    virtual void        transform(const Matrix& matrix) override;
 protected:
-    CADVector vertAlignmentPoint;
-    double    dfElevation;
-    string    sTag;
-    bool      bLockPosition;
+    CADVector           vertAlignmentPoint;
+    double              dfElevation;
+    string              sTag;
+    bool                bLockPosition;
 };
 
 /**
@@ -617,12 +598,12 @@ class CADAttdef : public CADAttrib
 public:
     CADAttdef();
 
-    string getPrompt() const;
-    void   setPrompt( const string& );
+    string              getPrompt() const;
+    void                setPrompt(const string&);
 
-    virtual void print() const override;
+    virtual void        print () const override;
 protected:
-    string sPrompt;
+    string              sPrompt;
 };
 
 //class EXTERN LineType

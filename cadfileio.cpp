@@ -28,17 +28,18 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  ******************************************************************************/
+
 #include "cadfileio.h"
 
-CADFileIO::CADFileIO( const char * pszFileName )
+CADFileIO::CADFileIO(const char* pszFileName)
 {
     m_soFilePath = pszFileName;
-    m_bIsOpened  = false;
+    m_bIsOpened = false;
 }
 
 CADFileIO::~CADFileIO()
 {
-    if( IsOpened() )
+    if(IsOpened())
         Close();
 }
 
@@ -46,14 +47,13 @@ bool CADFileIO::IsOpened() const
 {
     return m_bIsOpened;
 }
-
 bool CADFileIO::Close()
 {
     m_bIsOpened = false;
     return true;
 }
 
-const char * CADFileIO::GetFilePath() const
+const char* CADFileIO::GetFilePath() const
 {
-    return m_soFilePath.c_str();
+    return m_soFilePath.c_str ();
 }
