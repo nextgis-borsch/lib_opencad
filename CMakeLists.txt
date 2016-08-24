@@ -1,10 +1,10 @@
-#*******************************************************************************
+################################################################################
 #  Project: libopencad
 #  Purpose: OpenSource CAD formats support library
 #  Author: Alexandr Borzykh, mush3d at gmail.com
 #  Author: Dmitry Baryshnikov, bishop.dev@gmail.com
 #  Language: C++
-#*******************************************************************************
+################################################################################
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
@@ -27,10 +27,11 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-#*******************************************************************************
-
+################################################################################
+ 
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
-project(opencad)
+
+project(libopencad)
 
 # some init settings
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -50,91 +51,23 @@ configure_file(${CMAKE_MODULE_PATH}/uninstall.cmake.in ${CMAKE_BINARY_DIR}/cmake
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+enable_testing()
+include(FindAnyProject)
 
-include(util)
-
-check_version(OCAD_MAJOR_VERSION OCAD_MINOR_VERSION OCAD_REV_VERSION)
-set(VERSION ${OCAD_MAJOR_VERSION}.${OCAD_MINOR_VERSION}.${OCAD_REV_VERSION})
-set(SOVERSION 1)
-
-report_version(${PROJECT_NAME} ${VERSION})
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-set(OBJ_LIB)
-
-add_subdirectory(dwg)
-
-set(HHEADERS
-    opencad.h
-    opencad_api.h
-    cadfile.h
-    cadfileio.h
-    cadheader.h
-    cadclasses.h
-    cadtables.h
-    cadgeometry.h
-    cadlayer.h
-    cadcolors.h
-    caddictionary.h
-    cadobjects.h)
-
-set(HHEADER_PRIV
-    cadfilestreamio.h
-    )
-
-set(CSOURCES
-    opencad.cpp
-    cadfile.cpp
-    cadfileio.cpp
-    cadfilestreamio.cpp
-    cadheader.cpp
-    cadclasses.cpp
-    cadtables.cpp
-    cadgeometry.cpp
-    cadobjects.cpp
-    cadlayer.cpp
-    caddictionary.cpp)
-
-set(LIB_NAME)
+set(TARGET_LINK)
+add_subdirectory(lib)
 if(BUILD_SHARED_LIBS)
-    set(LIB_TYPE SHARED)
     set(LIB_NAME ${PROJECT_NAME})
 else()
-    set(LIB_TYPE STATIC)
     set(LIB_NAME ${PROJECT_NAME}static)
 endif()
+export(TARGETS ${TARGET_LINK} FILE ${LIB_NAME}-exports.cmake)
 
-add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
-
-if(BUILD_SHARED_LIBS)
-    if(WIN32)
-        set (LIB_VERSION ${OCAD_MAJOR_VERSION})
-        if(MSVC)
-            set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
-        endif()
-    else ()
-      set (LIB_VERSION ${VERSION})
-    endif()
-    set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
-    set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${SOVERSION})
-    set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL OCAD_EXPORTS)
+option(BUILD_APPS "Build console applications" ON)
+if(BUILD_APPS)
+    add_subdirectory(apps)
 endif()
-
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS ${LIB_NAME}
-        EXPORT ${LIB_NAME}
-        RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
-        ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
-        LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
-    )
-endif()
-
-export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake)
-
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${HHEADERS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/opencad" COMPONENT headers)
-endif()
+add_subdirectory(tests)
 
 # uninstall
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
