@@ -70,13 +70,13 @@ if(BUILD_APPS)
 endif()
 add_subdirectory(tests)
 
-set(DOC_FILES LICENSE)
+set(DOC_FILES LICENSE
+    README.md)
 
 install (FILES ${DOC_FILES}
-            DESTINATION ${INSTALL_DOC_DIR}
-            COMPONENT documents
-            OPTIONAL
-           )
+         DESTINATION ${INSTALL_DOC_DIR}
+         COMPONENT documents
+         OPTIONAL)
 
 # uninstall
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
