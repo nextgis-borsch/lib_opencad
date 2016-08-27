@@ -4,3 +4,7 @@ but some of basic functionality is already available.
 
 # License
 X/MIT
+
+# Version
+0.1.0
+
