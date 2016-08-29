@@ -5,3 +5,5 @@ but some of basic functionality is already available.
 # License
 X/MIT
 
+# Borsch
+Borsch repository link: https://github.com/nextgis-borsch/borsch
