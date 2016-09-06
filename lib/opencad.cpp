@@ -28,7 +28,6 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
-
 #include "opencad_api.h"
 #include "cadfilestreamio.h"
 #include "dwg/r2000.h"
@@ -40,62 +39,70 @@
 
 static int gLastError = CADErrorCodes::SUCCESS;
 
-static int CheckCADFile(CADFileIO* pCADFileIO)
+/**
+ * @brief Check CAD file
+ * @param pCADFileIO CAD file reader pointer owned by function
+ * @return returns and int, 0 if CAD file has unsupported format
+ */
+static int CheckCADFile(CADFileIO * pCADFileIO)
 {
-    if(NULL == pCADFileIO)
+    if( pCADFileIO == nullptr )
         return 0;
 
-    const char* pszFilePath = pCADFileIO->GetFilePath();
-    size_t nPathLen = strlen(pszFilePath);
-    if(toupper(pszFilePath[nPathLen - 3]) == 'D' &&
-       toupper(pszFilePath[nPathLen - 2]) == 'X' &&
-       toupper(pszFilePath[nPathLen - 1]) == 'F')
+    const char * pszFilePath = pCADFileIO->GetFilePath();
+    size_t nPathLen = strlen( pszFilePath );
+
+    if( toupper( pszFilePath[nPathLen - 3] ) == 'D' &&
+        toupper( pszFilePath[nPathLen - 2] ) == 'X' &&
+        toupper( pszFilePath[nPathLen - 1] ) == 'F' )
     {
         //TODO: "AutoCAD Binary DXF"
-        std::cerr << "DXF ASCII and binary is not supported yet";
+        std::cerr << "DXF ASCII and binary is not supported yet.";
         return 0;
     }
-    if(!(toupper(pszFilePath[nPathLen - 3]) == 'D' &&
-         toupper(pszFilePath[nPathLen - 2]) == 'W' &&
-         toupper(pszFilePath[nPathLen - 1]) == 'G'))
+    if( ! ( toupper( pszFilePath[nPathLen - 3] ) == 'D' &&
+            toupper( pszFilePath[nPathLen - 2] ) == 'W' &&
+            toupper( pszFilePath[nPathLen - 1] ) == 'G' ) )
     {
         return 0;
     }
 
-    if(!pCADFileIO->IsOpened())
-        pCADFileIO->Open(CADFileIO::OpenMode::read | CADFileIO::OpenMode::binary);
-    if(!pCADFileIO->IsOpened())
+    if( !pCADFileIO->IsOpened() )
+        pCADFileIO->Open( CADFileIO::OpenMode::read | CADFileIO::OpenMode::binary );
+    if( !pCADFileIO->IsOpened() )
         return 0;
 
-    char pabyDWGVersion[DWG_VERSION_STR_SIZE + 1] = {0};
+    char pabyDWGVersion[DWG_VERSION_STR_SIZE + 1] = { 0 };
     pCADFileIO->Rewind ();
-    pCADFileIO->Read( pabyDWGVersion, DWG_VERSION_STR_SIZE);
-    return atoi(pabyDWGVersion + 2);
+    pCADFileIO->Read( pabyDWGVersion, DWG_VERSION_STR_SIZE );
+    return atoi( pabyDWGVersion + 2 );
 }
 
 /**
  * @brief Open CAD file
  * @param pCADFileIO CAD file reader pointer ownd by function
  * @param eOptions Open options
+ * @param bReadUnsupportedGeometries Unsupported geoms will be returned as CADUnknown
  * @return CADFile pointer or NULL if failed. The pointer have to be freed by user
  */
-CADFile* OpenCADFile( CADFileIO* pCADFileIO, enum CADFile::OpenOptions eOptions )
+CADFile * OpenCADFile( CADFileIO * pCADFileIO, enum CADFile::OpenOptions eOptions, bool bReadUnsupportedGeometries )
 {
-    int nCADFileVersion = CheckCADFile(pCADFileIO);
+    int nCADFileVersion = CheckCADFile( pCADFileIO );
     CADFile * poCAD = nullptr;
 
-    switch (nCADFileVersion) {
-    case CADVersions::DWG_R2000:
-        poCAD = new DWGFileR2000 (pCADFileIO);
-        break;
-    default:
-        gLastError = CADErrorCodes::UNSUPPORTED_VERSION;
-        delete pCADFileIO;
-        return nullptr;
+    switch( nCADFileVersion )
+    {
+        case CADVersions::DWG_R2000:
+            poCAD = new DWGFileR2000( pCADFileIO );
+            break;
+        default:
+            gLastError = CADErrorCodes::UNSUPPORTED_VERSION;
+            delete pCADFileIO;
+            return nullptr;
     }
 
-    gLastError = poCAD->parseFile(eOptions);
-    if(gLastError != CADErrorCodes::SUCCESS)
+    gLastError = poCAD->ParseFile( eOptions, bReadUnsupportedGeometries );
+    if( gLastError != CADErrorCodes::SUCCESS )
     {
         delete poCAD;
         return nullptr;
@@ -118,7 +125,7 @@ int GetVersion()
  * @brief Get library version string
  * @return library version string
  */
-const char* GetVersionString()
+const char * GetVersionString()
 {
     return OCAD_VERSION;
 }
@@ -138,9 +145,9 @@ int GetLastErrorCode()
  * @return CADFileIO pointer or null if error. The pointer have to be freed by
  * user
  */
-CADFileIO* GetDefaultFileIO ( const char *pszFileName )
+CADFileIO* GetDefaultFileIO( const char * pszFileName )
 {
-    return new CADFileStreamIO(pszFileName);
+    return new CADFileStreamIO( pszFileName );
 }
 
 /**
@@ -149,10 +156,10 @@ CADFileIO* GetDefaultFileIO ( const char *pszFileName )
  * @return positive number for dwg version, negative for dxf version, 0 if error
  * occured
  */
-int IdentifyCADFile( CADFileIO* pCADFileIO, bool own )
+int IdentifyCADFile( CADFileIO * pCADFileIO, bool bOwn )
 {
     int result = CheckCADFile(pCADFileIO);
-    if(own)
+    if(bOwn)
         delete pCADFileIO;
     return result;
 }
@@ -161,7 +168,7 @@ int IdentifyCADFile( CADFileIO* pCADFileIO, bool own )
  * @brief List supported CAD Formats
  * @return String describes supported CAD formats
  */
-const char* GetCADFormats()
+const char * GetCADFormats()
 {
     return "DWG R2000 [ACAD1015]\n";
 }
@@ -172,17 +179,27 @@ const char* GetCADFormats()
  * @param eOptions Open options
  * @return CADFile pointer or NULL if failed. The pointer have to be freed by user.
  */
-CADFile* OpenCADFile( const char* pszFileName, enum CADFile::OpenOptions eOptions )
+CADFile * OpenCADFile( const char * pszFileName, enum CADFile::OpenOptions eOptions, bool bReadUnsupportedGeometries )
 {
-    return OpenCADFile (GetDefaultFileIO (pszFileName), eOptions);
+    if( pszFileName == NULL )
+    {
+        gLastError = CADErrorCodes::FILE_OPEN_FAILED;
+        return nullptr;
+    }
+
+    return OpenCADFile( GetDefaultFileIO( pszFileName ), eOptions, bReadUnsupportedGeometries );
 }
 
-void DebugMsg(const char* format, ...)
+#ifdef _DEBUG
+void DebugMsg( const char* format, ... )
+#else
+void DebugMsg( const char*, ... )
+#endif
 {
 #ifdef _DEBUG
     va_list argptr;
-    va_start(argptr, format);
-    vfprintf(stdout, format, argptr);
-    va_end(argptr);
+    va_start( argptr, format );
+    vfprintf( stdout, format, argptr );
+    va_end( argptr );
 #endif //_DEBUG
 }
