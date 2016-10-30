@@ -499,11 +499,12 @@ const char * CADHeader::getValueName( short code ) const
 
 void CADHeader::print() const
 {
-    cout << "============ HEADER Section ============" << endl;
+    cout << "============ HEADER Section ============\n";
     for( auto it : valuesMap )
     {
-        cout << getValueName( it.first ) << ": " << it.second.getString() << endl;
+        cout << getValueName( it.first ) << ": " << it.second.getString() << "\n";
     }
+    cout << "\n";
 }
 
 size_t CADHeader::getSize() const

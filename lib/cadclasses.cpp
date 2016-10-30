@@ -35,6 +35,26 @@
 
 using namespace std;
 
+//------------------------------------------------------------------------------
+// CADClass
+//------------------------------------------------------------------------------
+
+CADClass::CADClass() : sCppClassName(""),
+                sApplicationName(""),
+                sDXFRecordName(""),
+                dProxyCapFlag(0),
+                dInstanceCount(0),
+                bWasZombie(false),
+                bIsEntity(false),
+                dClassNum(0),
+                dClassVersion(0)
+{
+}
+
+//------------------------------------------------------------------------------
+// CADClasses
+//------------------------------------------------------------------------------
+
 CADClasses::CADClasses()
 {
 }
@@ -57,7 +77,7 @@ void CADClasses::addClass( CADClass stClass )
 
 CADClass CADClasses::getClassByNum( short num ) const
 {
-    for( CADClass cadClass : classes )
+    for( const CADClass &cadClass : classes )
     {
         if( cadClass.dClassNum == num )
             return cadClass;
@@ -67,17 +87,17 @@ CADClass CADClasses::getClassByNum( short num ) const
 
 void CADClasses::print() const
 {
-    cout << "============ CLASSES Section ============" << endl;
+    cout << "============ CLASSES Section ============\n";
 
     for( CADClass stClass : classes )
     {
-        cout << "Class: " << endl;
-        cout << "  Class Number: " << stClass.dClassNum << endl;
-        cout << "  Proxy capabilities flag or Version: " << stClass.dProxyCapFlag << endl;
-        cout << "  App name: " << stClass.sApplicationName << endl;
-        cout << "  C++ Class Name: " << stClass.sCppClassName << endl;
-        cout << "  DXF Class name: " << stClass.sDXFRecordName << endl;
-        cout << "  Was a zombie: " << stClass.bWasZombie << endl;
-        cout << "  Is-an-entity flag: " << stClass.bIsEntity << endl << endl;
+        cout << "Class:" <<
+        "\n  Class Number: " << stClass.dClassNum <<
+        "\n  Proxy capabilities flag or Version: " << stClass.dProxyCapFlag <<
+        "\n  App name: " << stClass.sApplicationName <<
+        "\n  C++ Class Name: " << stClass.sCppClassName <<
+        "\n  DXF Class name: " << stClass.sDXFRecordName <<
+        "\n  Was a zombie: " << stClass.bWasZombie <<
+        "\n  Is-an-entity flag: " << stClass.bIsEntity << "\n\n";
     }
 }

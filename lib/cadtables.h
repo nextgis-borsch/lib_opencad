@@ -34,8 +34,6 @@
 #include "cadheader.h"
 #include "cadlayer.h"
 
-using namespace std;
-
 class CADFile;
 
 /**
@@ -81,8 +79,8 @@ protected:
     int  ReadLayersTable( CADFile * const pCADFile, long dLayerControlHandle );
     void FillLayer( const CADEntityObject * pEntityObject );
 protected:
-    map<enum TableType, CADHandle> mapTables;
-    vector<CADLayer>               aLayers;
+    std::map<enum TableType, CADHandle> mapTables;
+    std::vector<CADLayer>               aLayers;
 };
 
 #endif // CADTABLES_H

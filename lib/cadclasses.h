@@ -33,35 +33,26 @@
 
 #include "opencad.h"
 
-#include <vector>
+// std headers
 #include <string>
+#include <vector>
 
-using namespace std;
-
-typedef struct _class
+class OCAD_EXTERN  CADClass
 {
-    _class() :      sCppClassName(""),
-                    sApplicationName(""),
-                    sDXFRecordName(""),
-                    dProxyCapFlag(0),
-                    dInstanceCount(0),
-                    bWasZombie(false),
-                    bIsEntity(false),
-                    dClassNum(0),
-                    dClassVersion(0)
-    {
-    }
+public:
+    CADClass();
 
-    string          sCppClassName;       /**< TV, C++ class name */
-    string          sApplicationName;    /**< TV, Application name */
-    string          sDXFRecordName;      /**< TV, Class DXF record name */
+public:
+    std::string          sCppClassName;       /**< TV, C++ class name */
+    std::string          sApplicationName;    /**< TV, Application name */
+    std::string          sDXFRecordName;      /**< TV, Class DXF record name */
     int             dProxyCapFlag;       /**< BITSHORT, Proxy capabilities flag, 90 */
     unsigned short  dInstanceCount;      /**< BITSHORT, Instance count for a custom class, 91 */
     bool            bWasZombie;          /**< BIT, Was-a-proxy flag, 280*/
     bool            bIsEntity;           /**< BITSHORT, Is-an-entity flag, 281 */
-    short           dClassNum;            // BITSHORT
-    short           dClassVersion;        // BITSHORT
-} CADClass;
+    short           dClassNum;           /**< BITSHORT, Class number */
+    short           dClassVersion;       /**< BITSHORT, Class version */
+};
 
 class OCAD_EXTERN CADClasses
 {
@@ -74,7 +65,7 @@ public:
     void                print() const;
 
 protected:
-    vector<CADClass>    classes;
+    std::vector<CADClass>    classes;
 };
 
 #endif // CADCLASSES_H

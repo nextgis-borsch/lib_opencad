@@ -31,12 +31,10 @@
 #ifndef CADFILE_H
 #define CADFILE_H
 
-#include "cadfileio.h"
-#include "cadclasses.h"
-#include "cadtables.h"
 #include "caddictionary.h"
-
-#include <string>
+#include "cadclasses.h"
+#include "cadfileio.h"
+#include "cadtables.h"
 
 /**
  * @brief The abstact CAD file class
@@ -44,7 +42,6 @@
 class OCAD_EXTERN CADFile
 {
     friend class CADTables;
-
     friend class CADLayer;
 
 public:
@@ -74,7 +71,7 @@ public:
 
     /**
      * @brief returns NamedObjectDictionary (root) of all others dictionaries
-     * @return pointer to the root CADDictionary
+     * @return root CADDictionary
      */
     virtual CADDictionary GetNOD() = 0;
 
@@ -92,9 +89,9 @@ protected:
 
     /**
      * @brief read geometry from CAD file
-     * @param size_t LayerIndex
-     * @param handle Handle of CAD object
-     * @param handle Handle of BlockRef (0 if geometry is not in block reference)
+     * @param iLayerIndex layer index (counts from 0)
+     * @param dHandle Handle of CAD object
+     * @param dBlockRefHandle Handle of BlockRef (0 if geometry is not in block reference)
      * @return NULL if failed or pointer which mast be feed by user
      */
     virtual CADGeometry * GetGeometry( size_t iLayerIndex, long dHandle, long dBlockRefHandle = 0 ) = 0;
@@ -147,6 +144,5 @@ protected:
     std::map<long, long> mapObjects; // object index <-> file offset
     bool bReadingUnsupportedGeometries;
 };
-
 
 #endif // CADFILE_H

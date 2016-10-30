@@ -30,10 +30,10 @@
  ******************************************************************************/
 #include "cadfileio.h"
 
-CADFileIO::CADFileIO( const char * pszFileName )
+CADFileIO::CADFileIO( const char * pszFileName ) :
+    m_soFilePath( pszFileName),
+    m_bIsOpened (false)
 {
-    m_soFilePath = pszFileName;
-    m_bIsOpened  = false;
 }
 
 CADFileIO::~CADFileIO()

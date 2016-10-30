@@ -33,11 +33,6 @@
 
 #include "cadobjects.h"
 
-#include <vector>
-#include <string>
-
-using namespace std;
-
 /*
  * @brief Base-class for XRecord and Dictionary.
  */
@@ -60,27 +55,29 @@ class OCAD_EXTERN CADXRecord : public CADDictionaryRecord
 public:
     CADXRecord();
 
-    const string&           getRecordData() const;
-    void                    setRecordData( const string& data );
+    const std::string getRecordData() const;
+    void              setRecordData( const std::string& data );
 
 private:
-    string                  sRecordData;
+    std::string sRecordData;
 };
 
 /*
  * @brief Class which implements Dictionary
  */
+typedef std::pair< std::string, CADDictionaryRecord*> CADDictionaryItem;
 class OCAD_EXTERN CADDictionary : public CADDictionaryRecord
 {
 public:
     CADDictionary();
     ~CADDictionary();
 
-    size_t                                  getRecordsCount();
-    void                                    addRecord( pair< string, CADDictionaryRecord*> );
-    pair< string, CADDictionaryRecord*>&    getRecord( size_t index );
+    size_t getRecordsCount();
+    void   addRecord( CADDictionaryItem );
+    CADDictionaryItem getRecord( size_t index );
+    std::string getRecordByName(const std::string& name) const;
 private:
-    vector< pair< string, CADDictionaryRecord* > > astXRecords;
+    std::vector< CADDictionaryItem > astXRecords;
 };
 
 #endif // CADDICTIONARY_H

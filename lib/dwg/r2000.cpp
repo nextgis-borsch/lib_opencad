@@ -40,9 +40,7 @@
 #include <memory>
 
 #ifdef __APPLE__
-
-#include <MacTypes.h>
-
+    #include <MacTypes.h>
 #endif
 
 #define UNKNOWN1 CADHeader::MAX_HEADER_CONSTANT + 1
@@ -60,6 +58,8 @@
 #define UNKNOWN13 CADHeader::MAX_HEADER_CONSTANT + 13
 #define UNKNOWN14 CADHeader::MAX_HEADER_CONSTANT + 14
 #define UNKNOWN15 CADHeader::MAX_HEADER_CONSTANT + 15
+
+using namespace std;
 
 int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 {
@@ -649,7 +649,7 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
         pFileIO->Read( buffer, DWGSentinelLength );
         if( memcmp( buffer, DWGDSClassesStart, DWGSentinelLength ) )
         {
-            cerr << "File is corrupted (wrong pointer to CLASSES section,"
+            std::cerr << "File is corrupted (wrong pointer to CLASSES section,"
                     "or CLASSES starting sentinel corrupted.)\n";
 
             return CADErrorCodes::CLASSES_SECTION_READ_FAILED;
@@ -682,7 +682,7 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
         pFileIO->Read( buffer, DWGSentinelLength );
         if( memcmp( buffer, DWGDSClassesEnd, DWGSentinelLength ) )
         {
-            cerr << "File is corrupted (CLASSES section ending sentinel "
+            std::cerr << "File is corrupted (CLASSES section ending sentinel "
                     "doesnt match.)\n";
             return CADErrorCodes::CLASSES_SECTION_READ_FAILED;
         }
@@ -1397,7 +1397,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
         case CADObject::VERTEX_MESH:
         case CADObject::VERTEX_PFACE_FACE:
         default:
-            cerr << "Asked geometry has unsupported type." << endl;
+            std::cerr << "Asked geometry has unsupported type." << endl;
             poGeometry = new CADUnknown();
             break;
     }

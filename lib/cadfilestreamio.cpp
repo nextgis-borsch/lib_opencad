@@ -44,7 +44,7 @@ const char * CADFileStreamIO::ReadLine()
     return nullptr;
 }
 
-bool CADFileStreamIO::Eof()
+bool CADFileStreamIO::Eof() const
 {
     return m_oFileStream.eof();
 }
@@ -92,7 +92,7 @@ int CADFileStreamIO::Seek( long offset, CADFileIO::SeekOrigin origin )
     return m_oFileStream.seekg( offset, direction ).good() ? 0 : 1;
 }
 
-long CADFileStreamIO::Tell()
+long int CADFileStreamIO::Tell()
 {
     return m_oFileStream.tellg();
 }

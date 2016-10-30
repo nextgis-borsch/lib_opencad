@@ -28,11 +28,10 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
-
 #include "cadgeometry.h"
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 using namespace std;
 
@@ -55,7 +54,15 @@ Matrix::Matrix()
 
 void Matrix::translate( const CADVector& vector )
 {
-    double a00 = matrix[0], a01 = matrix[1], a02 = matrix[2], a10 = matrix[3], a11 = matrix[4], a12 = matrix[5], a20 = matrix[6], a21 = matrix[7], a22 = matrix[8];
+    double a00 = matrix[0];
+    double a01 = matrix[1];
+    double a02 = matrix[2];
+    double a10 = matrix[3];
+    double a11 = matrix[4];
+    double a12 = matrix[5];
+    double a20 = matrix[6];
+    double a21 = matrix[7];
+    double a22 = matrix[8];
 
     matrix[6] = vector.getX() * a00 + vector.getY() * a10 + a20;
     matrix[7] = vector.getX() * a01 + vector.getY() * a11 + a21;
@@ -64,8 +71,14 @@ void Matrix::translate( const CADVector& vector )
 
 void Matrix::rotate( double rotation )
 {
-    double              s                                                                                        = sin( rotation ), c = cos(
-            rotation ), a00                                                                                      = matrix[0], a01 = matrix[1], a02 = matrix[2], a10 = matrix[3], a11 = matrix[4], a12 = matrix[5];
+    const double s = sin( rotation );
+    const double c = cos( rotation );
+    double a00 = matrix[0];
+    double a01 = matrix[1];
+    double a02 = matrix[2];
+    double a10 = matrix[3];
+    double a11 = matrix[4];
+    double a12 = matrix[5];
 
     matrix[0] = c * a00 + s * a10;
     matrix[1] = c * a01 + s * a11;
@@ -99,7 +112,8 @@ CADVector Matrix::multiply( const CADVector& vector ) const
 // CADGeometry
 //------------------------------------------------------------------------------
 
-CADGeometry::CADGeometry() : geometryType( UNDEFINED ), thickness( 0 )
+CADGeometry::CADGeometry() : geometryType( UNDEFINED ),
+    thickness( 0 )
 {
 
 }
@@ -167,7 +181,7 @@ void CADUnknown::transform( const Matrix& /*matrix*/)
 
 void CADUnknown::print() const
 {
-    cout << "|---------Unhandled---------|\n" << endl;
+    cout << "|---------Unhandled---------|\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -179,11 +193,11 @@ CADPoint3D::CADPoint3D() : xAxisAng( 0.0f )
     geometryType = CADGeometry::POINT;
 }
 
-CADPoint3D::CADPoint3D( const CADVector& positionIn, double thicknessIn )
+CADPoint3D::CADPoint3D( const CADVector& positionIn, double thicknessIn ) :
+    position( positionIn)
 {
+    thickness = thicknessIn;
     geometryType = CADGeometry::POINT;
-    thickness    = thicknessIn;
-    position     = positionIn;
 }
 
 CADVector CADPoint3D::getPosition() const
@@ -218,8 +232,10 @@ void CADPoint3D::setXAxisAng( double value )
 
 void CADPoint3D::print() const
 {
-    cout << "|---------Point---------|\n" << "Position: " << "\t" << position.getX() << "\t" << position.getY() <<
-    "\t" << position.getZ() << "\n" << endl;
+    cout << "|---------Point---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() <<
+                  "\t" << position.getZ() << "\n\n";
 }
 
 void CADPoint3D::transform( const Matrix& matrix )
@@ -236,11 +252,11 @@ CADLine::CADLine()
     geometryType = CADGeometry::LINE;
 }
 
-CADLine::CADLine( const CADPoint3D& startIn, const CADPoint3D& endIn )
+CADLine::CADLine( const CADPoint3D& startIn, const CADPoint3D& endIn ) :
+    start( startIn ),
+    end( endIn )
 {
     geometryType = CADGeometry::LINE;
-    start        = startIn;
-    end          = endIn;
 }
 
 CADPoint3D CADLine::getStart() const
@@ -265,9 +281,13 @@ void CADLine::setEnd( const CADPoint3D& value )
 
 void CADLine::print() const
 {
-    cout << "|---------Line---------|\n" << "Start Position: " << "\t" << start.getPosition().getX() << "\t" <<
-    start.getPosition().getY() << "\t" << start.getPosition().getZ() << "\n" << "End Position: " << "\t" <<
-    end.getPosition().getX() << "\t" << end.getPosition().getY() << "\t" << end.getPosition().getZ() << "\n" << endl;
+    cout << "|---------Line---------|\n" <<
+        "Start Position: \t" << start.getPosition().getX() <<
+                        "\t" << start.getPosition().getY() <<
+                        "\t" << start.getPosition().getZ() << "\n" <<
+        "End Position: \t" << end.getPosition().getX() <<
+                      "\t" << end.getPosition().getY() <<
+                      "\t" << end.getPosition().getZ() << "\n\n";
 }
 
 void CADLine::transform( const Matrix& matrix )
@@ -297,16 +317,20 @@ void CADCircle::setRadius( double value )
 
 void CADCircle::print() const
 {
-    cout << "|---------Circle---------|\n" << "Position: " << "\t" << position.getX() << "\t" << position.getY() <<
-    "\t" << position.getZ() << "\n" << "Radius: " << radius << "\n" << endl;
-
+    cout << "|---------Circle---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() <<
+                  "\t" << position.getZ() << "\n" <<
+        "Radius: " << radius << "\n\n";
 }
 
 //------------------------------------------------------------------------------
 // CADArc
 //------------------------------------------------------------------------------
 
-CADArc::CADArc() : CADCircle(), startingAngle( 0.0f ), endingAngle( 0.0f )
+CADArc::CADArc() : CADCircle(),
+    startingAngle( 0.0f ),
+    endingAngle( 0.0f )
 {
     geometryType = CADGeometry::ARC;
 }
@@ -333,9 +357,13 @@ void CADArc::setEndingAngle( double value )
 
 void CADArc::print() const
 {
-    cout << "|---------Arc---------|\n" << "Position: " << "\t" << position.getX() << "\t" << position.getY() << "\t" <<
-    position.getZ() << "\n" << "Radius: " << "\t" << radius << "\n" << "Beg & End angles: " << "\t" << startingAngle <<
-    "\t" << endingAngle << "\n" << endl;
+    cout << "|---------Arc---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() <<
+                  "\t" << position.getZ() << "\n" <<
+        "Radius: \t" << radius << "\n" <<
+        "Beg & End angles: \t" << startingAngle <<
+                          "\t" << endingAngle << "\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -364,12 +392,14 @@ CADVector& CADPolyline3D::getVertex( size_t index )
 
 void CADPolyline3D::print() const
 {
-    cout << "|------Polyline3D-----|" << endl;
+    cout << "|------Polyline3D-----|\n";
     for( size_t i = 0; i < vertexes.size(); ++i )
     {
-        cout << "  #" << i << ". X: " << vertexes[i].getX() << ", Y: " << vertexes[i].getY() << std::endl;
+        cout << "  #" << i <<
+            ". X: " << vertexes[i].getX() <<
+            ", Y: " << vertexes[i].getY() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADPolyline3D::transform( const Matrix& matrix )
@@ -391,12 +421,14 @@ CADLWPolyline::CADLWPolyline()
 
 void CADLWPolyline::print() const
 {
-    cout << "|------LWPolyline-----|" << endl;
+    cout << "|------LWPolyline-----|\n";
     for( size_t i = 0; i < vertexes.size(); ++i )
     {
-        cout << "  #" << i << ". X: " << vertexes[i].getX() << ", Y: " << vertexes[i].getY() << std::endl;
+        cout << "  #" << i <<
+            ". X: " << vertexes[i].getX() <<
+            ", Y: " << vertexes[i].getY() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 double CADLWPolyline::getConstWidth() const
@@ -459,12 +491,12 @@ void CADLWPolyline::setClosed( bool state )
     bClosed = state;
 }
 
-
 //------------------------------------------------------------------------------
 // CADEllipse
 //------------------------------------------------------------------------------
 
-CADEllipse::CADEllipse() : CADArc(), axisRatio( 0.0f )
+CADEllipse::CADEllipse() : CADArc(),
+    axisRatio( 0.0f )
 {
     geometryType = CADGeometry::ELLIPSE;
 }
@@ -491,16 +523,22 @@ void CADEllipse::setSMAxis( const CADVector& SMAxisVect )
 
 void CADEllipse::print() const
 {
-    cout << "|---------Ellipse---------|\n" << "Position: " << "\t" << position.getX() << "\t" << position.getY() <<
-    "\t" << position.getZ() << "\n" << "Beg & End angles: " << "\t" << startingAngle << "\t" << endingAngle << "\n" <<
-    endl;
+    cout << "|---------Ellipse---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() <<
+                  "\t" << position.getZ() << "\n" <<
+        "Beg & End angles: \t" << startingAngle <<
+                          "\t" << endingAngle << "\n\n";
 }
 
 //------------------------------------------------------------------------------
 // CADText
 //------------------------------------------------------------------------------
 
-CADText::CADText() : CADPoint3D(), obliqueAngle( 0 ), rotationAngle( 0 ), height( 0 )
+CADText::CADText() : CADPoint3D(),
+    obliqueAngle( 0 ),
+    rotationAngle( 0 ),
+    height( 0 )
 {
     geometryType = CADGeometry::TEXT;
 }
@@ -547,8 +585,10 @@ void CADText::setObliqueAngle( double value )
 
 void CADText::print() const
 {
-    cout << "|---------Text---------|\n" << "Position:" << "\t" << position.getX() << "\t" << position.getY() << "\n" <<
-    "Text value:\t" << textValue << "\n" << std::endl;
+    cout << "|---------Text---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() << "\n" <<
+        "Text value: \t" << textValue << "\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -572,8 +612,11 @@ void CADRay::setVectVector( const CADVector& value )
 
 void CADRay::print() const
 {
-    cout << "|---------Ray---------|\n" << "Position:" << "\t" << position.getX() << "\t" << position.getY() <<
-    "\nVector:" << "\t" << extrusion.getX() << "\t" << extrusion.getY() << "\n" << std::endl;
+    cout << "|---------Ray---------|\n" <<
+        "Position: \t" << position.getX() <<
+                  "\t" << position.getY() << "\n" <<
+        "Vector: \t" << extrusion.getX() <<
+                "\t" << extrusion.getY() << "\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -597,25 +640,29 @@ CADSpline::CADSpline()
 void CADSpline::print() const
 {
 
-    cout << "|---------Spline---------|\n" << "Is rational: \t" << rational << "\n" << "Is closed: \t" << closed <<
-    "\n" << "Control pts count: " << avertCtrlPoints.size() << std::endl;
+    cout << "|---------Spline---------|\n" <<
+        "Is rational: \t" << rational << "\n" <<
+        "Is closed: \t" << closed << "\n" <<
+        "Control pts count: " << avertCtrlPoints.size() << "\n";
     for( size_t j = 0; j < avertCtrlPoints.size(); ++j )
     {
-        cout << "  #" << j << ".\t" << avertCtrlPoints[j].getX() << "\t" << avertCtrlPoints[j].getY() << "\t" <<
-        avertCtrlPoints[j].getZ() << "\t";
+        cout << "  #" << j << ".\t" << avertCtrlPoints[j].getX() <<
+                               "\t" << avertCtrlPoints[j].getY() <<
+                               "\t" << avertCtrlPoints[j].getZ() << "\t";
         if( weight == true )
-            cout << ctrlPointsWeight[j] << endl;
+            cout << ctrlPointsWeight[j] << "\n";
         else
-            cout << endl;
+            cout << "\n";
     }
 
-    cout << "Fit pts count: " << averFitPoints.size() << endl;
+    cout << "Fit pts count: " << averFitPoints.size() << "\n";
     for( size_t j = 0; j < averFitPoints.size(); ++j )
     {
-        cout << "  #" << j << ".\t" << averFitPoints[j].getX() << "\t" << averFitPoints[j].getY() << "\t" <<
-        averFitPoints[j].getZ() << endl;
+        cout << "  #" << j << ".\t" << averFitPoints[j].getX() <<
+                               "\t" << averFitPoints[j].getY() <<
+                               "\t" << averFitPoints[j].getZ() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADSpline::transform( const Matrix& matrix )
@@ -727,13 +774,14 @@ CADSolid::CADSolid()
 
 void CADSolid::print() const
 {
-    cout << "|---------Solid---------|" << endl;
+    cout << "|---------Solid---------|\n";
     for( size_t i = 0; i < avertCorners.size(); ++i )
     {
-        cout << "  #" << i << ".\t" << avertCorners[i].getX() << "\t" << avertCorners[i].getY() << "\n  Elevation: " <<
-        elevation << "\n";
+        cout << "  #" << i << ".\t" << avertCorners[i].getX() <<
+                               "\t" << avertCorners[i].getY() << "\n" <<
+                "Elevation: " << elevation << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADSolid::transform( const Matrix& matrix )
@@ -842,7 +890,8 @@ void CADImage::setFilePath( const string& value )
     filePath = value;
 }
 
-void CADImage::setOptions( bool transparency, bool clip, unsigned char brightness, unsigned char contrast )
+void CADImage::setOptions( bool transparency, bool clip, unsigned char brightness,
+    unsigned char contrast )
 {
     bTransparency = transparency;
     bClipping     = clip;
@@ -852,23 +901,27 @@ void CADImage::setOptions( bool transparency, bool clip, unsigned char brightnes
 
 void CADImage::print() const
 {
-    cout << "|---------Image---------|\n" << "Filepath: " << filePath << "\n" << "Insertion point: " <<
-    vertInsertionPoint.getX() << "\t" << vertInsertionPoint.getY() << "\n" << "Transparent? : " << bTransparency <<
-    "\n" << "Brightness (0-100) : " << dBrightness << "\n" << "Contrast (0-100) : " << dContrast << "\n" <<
-    "Clipping polygon:" << endl;
+    cout << "|---------Image---------|\n" <<
+        "Filepath: " << filePath << "\n" <<
+        "Insertion point: " << vertInsertionPoint.getX() << "\t" <<
+                               vertInsertionPoint.getY() << "\n" <<
+        "Transparent? : " << bTransparency << "\n" <<
+        "Brightness (0-100) : " << dBrightness << "\n" <<
+        "Contrast (0-100) : " << dContrast << "\n" <<
+        "Clipping polygon:" << endl;
     for( size_t i = 0; i < avertClippingPolygon.size(); ++i )
     {
-        cout << "  #" << i << ". X: " << avertClippingPolygon[i].getX() << ", Y: " << avertClippingPolygon[i].getY() <<
-        std::endl;
+        cout << "  #" << i << ". X: " << avertClippingPolygon[i].getX() <<
+                              ", Y: " << avertClippingPolygon[i].getY() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADImage::transform( const Matrix& matrix )
 {
     vertInsertionPoint = matrix.multiply( vertInsertionPoint );
     for( CADVector& pt : avertClippingPolygon )
-        pt             = matrix.multiply( pt );
+        pt = matrix.multiply( pt );
 }
 
 void CADImage::addClippingPoint( const CADVector& pt )
@@ -917,8 +970,11 @@ void CADMText::setExtentsWidth( double value )
 
 void CADMText::print() const
 {
-    cout << "|---------MText---------|\n" << "Position: " << position.getX() << "\t" << position.getY() << "\t" <<
-    position.getZ() << "\n" << "Text: " << textValue << "\n" << std::endl;
+    cout << "|---------MText---------|\n" <<
+        "Position: " << position.getX() << "\t" <<
+                        position.getY() << "\t" <<
+                        position.getZ() << "\n" <<
+        "Text: " << textValue << "\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -927,7 +983,7 @@ void CADMText::print() const
 
 CADFace3D::CADFace3D()
 {
-    geometryType = FACE3D;
+    geometryType = CADGeometry::FACE3D;
 }
 
 void CADFace3D::addCorner( const CADVector& corner )
@@ -942,13 +998,15 @@ CADVector CADFace3D::getCorner( size_t index )
 
 void CADFace3D::print() const
 {
-    cout << "|---------3DFace---------|\n" << "Corners: " << "\n";
+    cout << "|---------3DFace---------|\n" <<
+        "Corners: \n";
     for( size_t i = 0; i < avertCorners.size(); ++i )
     {
-        cout << "  #" << i << ". X: " << avertCorners[i].getX() << "\t" << "Y: " << avertCorners[i].getY() << "\t" <<
-        "Z: " << avertCorners[i].getZ() << "\n";
+        cout << "  #" << i << ". X: " << avertCorners[i].getX() << "\t" <<
+                                "Y: " << avertCorners[i].getY() << "\t" <<
+                                "Z: " << avertCorners[i].getZ() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADFace3D::transform( const Matrix& matrix )
@@ -975,7 +1033,7 @@ void CADFace3D::setInvisFlags( short value )
 
 CADPolylinePFace::CADPolylinePFace()
 {
-    geometryType = POLYLINE_PFACE;
+    geometryType = CADGeometry::POLYLINE_PFACE;
 }
 
 void CADPolylinePFace::print() const
@@ -983,10 +1041,11 @@ void CADPolylinePFace::print() const
     cout << "|---------PolylinePface---------|\n";
     for( size_t i = 0; i < vertexes.size(); ++i )
     {
-        cout << "  #" << i << ".\t" << vertexes[i].getX() << "\t" << vertexes[i].getY() << "\t" << vertexes[i].getZ() <<
-        "\n";
+        cout << "  #" << i << ".\t" << vertexes[i].getX() <<
+                               "\t" << vertexes[i].getY() <<
+                               "\t" << vertexes[i].getZ() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADPolylinePFace::transform( const Matrix& matrix )
@@ -1011,9 +1070,13 @@ CADXLine::CADXLine()
 
 void CADXLine::print() const
 {
-    cout << "|---------XLine---------|\n" << "Position: " << position.getX() << "\t" << position.getY() << "\t" <<
-    position.getZ() << "\n" << "Direction: " << extrusion.getX() << "\t" << extrusion.getY() << "\t" <<
-    extrusion.getZ() << "\n" << endl;
+    cout << "|---------XLine---------|\n" <<
+        "Position: " << position.getX() << "\t" <<
+                        position.getY() << "\t" <<
+                        position.getZ() << "\n" <<
+        "Direction: " << extrusion.getX() << "\t" <<
+                         extrusion.getY() << "\t" <<
+                         extrusion.getZ() << "\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -1027,14 +1090,18 @@ CADMLine::CADMLine()
 
 void CADMLine::print() const
 {
-    cout << "|---------MLine---------|\n" << "Base point: " << position.getX() << "\t" << position.getY() << "\t" <<
-    position.getZ() << "\n" << "Vertexes:\n";
+    cout << "|---------MLine---------|\n" <<
+        "Base point: " << position.getX() << "\t" <<
+                          position.getY() << "\t" <<
+                          position.getZ() << "\n" <<
+        "Vertexes:\n";
     for( size_t i = 0; i < avertVertexes.size(); ++i )
     {
-        cout << "  #" << i << ".\t" << avertVertexes[i].getX() << "\t" << avertVertexes[i].getY() << "\t" <<
-        avertVertexes[i].getZ() << "\n";
+        cout << "  #" << i << ".\t" << avertVertexes[i].getX() <<
+                               "\t" << avertVertexes[i].getY() <<
+                               "\t" << avertVertexes[i].getZ() << "\n";
     }
-    cout << endl;
+    cout << "\n";
 }
 
 void CADMLine::transform( const Matrix& matrix )
@@ -1082,8 +1149,12 @@ CADAttrib::CADAttrib()
 
 void CADAttrib::print() const
 {
-    cout << "|---------Attribute---------|\n" << "Base point: " << position.getX() << "\t" << position.getY() << "\t" <<
-    position.getZ() << "\n" << "Tag: " << sTag << "\n" << "Text: " << textValue << "\n" << endl;
+    cout << "|---------Attribute---------|\n" <<
+        "Base point: " << position.getX() << "\t" <<
+                          position.getY() << "\t" <<
+                          position.getZ() << "\n" <<
+        "Tag: " << sTag << "\n" <<
+        "Text: " << textValue << "\n\n";
 }
 
 void CADAttrib::transform( const Matrix& matrix )
@@ -1143,9 +1214,13 @@ CADAttdef::CADAttdef()
 
 void CADAttdef::print() const
 {
-    cout << "|---------Attribute defn---------|\n" << "Base point: " << position.getX() << "\t" << position.getY() <<
-    "\t" << position.getZ() << "\n" << "Tag: " << sTag << "\n" << "Text: " << textValue << "\n" << "Prompt: " <<
-    sPrompt << "\n" << endl;
+    cout << "|---------Attribute defn---------|\n" <<
+        "Base point: " << position.getX() << "\t" <<
+                          position.getY() << "\t" <<
+                          position.getZ() << "\n" <<
+        "Tag: " << sTag << "\n" <<
+        "Text: " << textValue << "\n" <<
+        "Prompt: " << sPrompt << "\n\n";
 }
 
 string CADAttdef::getPrompt() const

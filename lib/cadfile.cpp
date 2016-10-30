@@ -98,9 +98,7 @@ int CADFile::ReadTables( CADFile::OpenOptions /*eOptions*/ )
     // TODO: read other tables in ALL option mode
 
     int nResult = oTables.ReadTable( this, CADTables::LayersTable );
-//    if(nResult != CADErrorCodes::SUCCESS)
     return nResult;
-
 }
 
 size_t CADFile::GetLayersCount() const

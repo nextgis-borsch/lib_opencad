@@ -38,14 +38,12 @@
 
 class CADFile;
 
-using namespace std;
-
 class OCAD_EXTERN CADLayer
 {
 public:
            CADLayer( CADFile * file );
-    string getName() const;
-    void   setName( const string& value );
+    std::string getName() const;
+    void   setName( const std::string& value );
 
     bool getFrozen() const;
     void setFrozen( bool value );
@@ -74,7 +72,7 @@ public:
     long getHandle() const;
     void setHandle( long value );
 
-    unordered_set<string> getAttributesTags();
+    std::unordered_set<std::string> getAttributesTags();
 
     // cadinserthandle is 0 by default because if entity isnt a part of custom block - its a part of ModelSpace block.
     void addHandle( long handle, enum CADObject::ObjectType type, long cadinserthandle = 0 );
@@ -87,12 +85,12 @@ public:
     /**
      * @brief returns a vector of presented geometries types
      */
-    vector<CADObject::ObjectType> getGeometryTypes();
+    std::vector<CADObject::ObjectType> getGeometryTypes();
 
 protected:
     bool addAttribute( const CADObject * pObject );
 protected:
-    string layerName;
+    std::string layerName;
     bool   frozen;
     bool   on;
     bool   frozenByDefault;
@@ -103,12 +101,12 @@ protected:
     size_t layerId;
     long   layer_handle;
 
-    vector<CADObject::ObjectType>           geometryTypes; // FIXME: replace with hashset would be perfect
-    unordered_set<string>                   attributesNames;
-    vector<pair<long, long> >               geometryHandles; // second param is CADInsert handle, 0 if its not a geometry in block ref.
-    vector<long>                            imageHandles;
-    vector<pair<long, map<string, long> > > geometryAttributes;
-    map<long, Matrix>                       transformations;
+    std::vector<CADObject::ObjectType>  geometryTypes; // FIXME: replace with hashset would be perfect
+    std::unordered_set<std::string>     attributesNames;
+    std::vector<std::pair<long, long> > geometryHandles; // second param is CADInsert handle, 0 if its not a geometry in block ref.
+    std::vector<long>                   imageHandles;
+    std::vector<std::pair<long, std::map<std::string, long> > > geometryAttributes;
+    std::map<long, Matrix>              transformations;
 
     CADFile * pCADFile;
 };

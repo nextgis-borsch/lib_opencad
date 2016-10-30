@@ -35,18 +35,26 @@
 #include <iostream>
 #include <algorithm>
 
-CADLayer::CADLayer( CADFile * file ) : frozen( false ), on( true ), frozenByDefault( false ), locked( false ),
-                                       plotting( false ), lineWeight( 1 ), color( 0 ), layerId( 0 ), layer_handle( 0 ),
-                                       pCADFile( file )
+CADLayer::CADLayer( CADFile * file ) :
+    frozen( false ),
+    on( true ),
+    frozenByDefault( false ),
+    locked( false ),
+    plotting( false ),
+    lineWeight( 1 ),
+    color( 0 ),
+    layerId( 0 ),
+    layer_handle( 0 ),
+    pCADFile( file )
 {
 }
 
-string CADLayer::getName() const
+std::string CADLayer::getName() const
 {
     return layerName;
 }
 
-void CADLayer::setName( const string& value )
+void CADLayer::setName( const std::string& value )
 {
     layerName = value;
 }
@@ -144,12 +152,12 @@ void CADLayer::setHandle( long value )
 void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinserthandle )
 {
 #ifdef _DEBUG
-    cout << "addHandle: " << handle << " type: " << type << endl;
+    std::cout << "addHandle: " << handle << " type: " << type << "\n";
 #endif //_DEBUG
     if( type == CADObject::ATTRIB || type == CADObject::ATTDEF )
     {
-        unique_ptr<CADAttdef> attdef( static_cast< CADAttdef *>( pCADFile->GetGeometry( this->getId() - 1, handle ) ) );
-
+        std::unique_ptr<CADAttdef> attdef( static_cast< CADAttdef *>(
+                         pCADFile->GetGeometry( this->getId() - 1, handle ) ) );
         attributesNames.insert( attdef->getTag() );
     }
 
@@ -157,12 +165,14 @@ void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinser
     {
         // TODO: transform insert to block of objects (do we need to transform
         // coordinates according to insert point)?
-        unique_ptr<CADObject> insert( pCADFile->GetObject( handle, false ) );
+        std::unique_ptr<CADObject> insert( pCADFile->GetObject( handle, false ) );
         CADInsertObject * pInsert = static_cast<CADInsertObject *>(insert.get());
         if( nullptr != pInsert )
         {
-            unique_ptr<CADObject> blockHeader( pCADFile->GetObject( pInsert->hBlockHeader.getAsLong(), false ) );
-            CADBlockHeaderObject * pBlockHeader = static_cast<CADBlockHeaderObject *>(blockHeader.get());
+            std::unique_ptr<CADObject> blockHeader( pCADFile->GetObject(
+                                    pInsert->hBlockHeader.getAsLong(), false ) );
+            CADBlockHeaderObject * pBlockHeader =
+                          static_cast<CADBlockHeaderObject *>(blockHeader.get());
             if( nullptr != pBlockHeader )
             {
 #ifdef _DEBUG
@@ -172,16 +182,17 @@ void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinser
                 }
 #endif //_DEBUG
                 auto dCurrentEntHandle = pBlockHeader->hEntities[0].getAsLong();
-                auto dLastEntHandle    = pBlockHeader->hEntities[pBlockHeader->hEntities.size() -
-                                                                 1].getAsLong(); // FIXME: in 2000+ entities probably has no links to each other.
+                auto dLastEntHandle    = pBlockHeader->hEntities[
+                    pBlockHeader->hEntities.size() - 1].getAsLong(); // FIXME: in 2000+ entities probably has no links to each other.
 
                 if( dCurrentEntHandle == dLastEntHandle ) // Blocks can be empty (contain no objects)
                     return;
 
                 while( true )
                 {
-                    unique_ptr<CADEntityObject> entity( static_cast< CADEntityObject * >(
-                                                                pCADFile->GetObject( dCurrentEntHandle, true ) ) );
+                    std::unique_ptr<CADEntityObject> entity(
+                        static_cast< CADEntityObject * >( pCADFile->GetObject(
+                                                    dCurrentEntHandle, true ) ) );
 
                     if( dCurrentEntHandle == dLastEntHandle )
                     {
@@ -194,7 +205,8 @@ void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinser
                             mat.rotate( pInsert->dfRotation );
                             transformations[dCurrentEntHandle] = mat;
                             break;
-                        } else
+                        }
+                        else
                         {
                             assert( 0 );
                         }
@@ -212,8 +224,11 @@ void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinser
                         if( entity->stCed.bNoLinks )
                             ++dCurrentEntHandle;
                         else
-                            dCurrentEntHandle = entity->stChed.hNextEntity.getAsLong( entity->stCed.hObjectHandle );
-                    } else
+                            dCurrentEntHandle =
+                                entity->stChed.hNextEntity.getAsLong(
+                                    entity->stCed.hObjectHandle );
+                    }
+                    else
                     {
                         assert ( 0 );
                     }
@@ -235,22 +250,24 @@ void CADLayer::addHandle( long handle, CADObject::ObjectType type, long cadinser
                 {
                     if( geometryTypes.size() == 0 ) geometryTypes.push_back( type );
 
-                    if( find( geometryTypes.begin(), geometryTypes.end(), type ) == geometryTypes.end() )
+                    if( find( geometryTypes.begin(), geometryTypes.end(), type ) ==
+                        geometryTypes.end() )
                     {
                         geometryTypes.push_back( type );
                     }
-                    geometryHandles.push_back( make_pair( handle, cadinserthandle ) );
+                    geometryHandles.push_back( std::make_pair( handle, cadinserthandle ) );
                 }
             }
             else
             {
                 if( geometryTypes.size() == 0 ) geometryTypes.push_back( type );
 
-                if( find( geometryTypes.begin(), geometryTypes.end(), type ) == geometryTypes.end() )
+                if( find( geometryTypes.begin(), geometryTypes.end(), type ) ==
+                    geometryTypes.end() )
                 {
                     geometryTypes.push_back( type );
                 }
-                geometryHandles.push_back( make_pair( handle, cadinserthandle ) );
+                geometryHandles.push_back( std::make_pair( handle, cadinserthandle ) );
             }
         }
     }
@@ -264,8 +281,8 @@ size_t CADLayer::getGeometryCount() const
 CADGeometry * CADLayer::getGeometry( size_t index )
 {
     auto handleBlockRefPair = geometryHandles[index];
-    CADGeometry * pGeom = pCADFile->GetGeometry( this->getId() - 1, handleBlockRefPair.first,
-                                                 handleBlockRefPair.second );
+    CADGeometry * pGeom = pCADFile->GetGeometry( this->getId() - 1,
+                        handleBlockRefPair.first, handleBlockRefPair.second );
     if( nullptr == pGeom )
         return nullptr;
     auto iter = transformations.find( handleBlockRefPair.first );
@@ -284,7 +301,8 @@ size_t CADLayer::getImageCount() const
 
 CADImage * CADLayer::getImage( size_t index )
 {
-    return static_cast<CADImage *>(pCADFile->GetGeometry( this->getId() - 1, imageHandles[index] ));
+    return static_cast<CADImage *>(pCADFile->GetGeometry( this->getId() - 1,
+                                                            imageHandles[index] ));
 }
 
 bool CADLayer::addAttribute( const CADObject * pObject )
@@ -292,8 +310,8 @@ bool CADLayer::addAttribute( const CADObject * pObject )
     if( nullptr == pObject )
         return true;
 
-    auto      attrib = static_cast<const CADAttribObject *>(pObject);
-    for( auto i      = geometryAttributes.begin(); i != geometryAttributes.end(); ++i )
+    auto attrib = static_cast<const CADAttribObject *>(pObject);
+    for( auto i = geometryAttributes.begin(); i != geometryAttributes.end(); ++i )
     {
         if( i->first == attrib->stChed.hOwner.getAsLong() )
         {
@@ -305,12 +323,12 @@ bool CADLayer::addAttribute( const CADObject * pObject )
     return false;
 }
 
-vector<CADObject::ObjectType> CADLayer::getGeometryTypes()
+std::vector<CADObject::ObjectType> CADLayer::getGeometryTypes()
 {
     return geometryTypes;
 }
 
-unordered_set<string> CADLayer::getAttributesTags()
+std::unordered_set<std::string> CADLayer::getAttributesTags()
 {
     return attributesNames;
 }

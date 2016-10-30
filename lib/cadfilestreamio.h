@@ -42,7 +42,7 @@ public:
     virtual             ~CADFileStreamIO();
 
     virtual const char* ReadLine() override;
-    virtual bool        Eof() override;
+    virtual bool        Eof() const override;
     virtual bool        Open(int mode) override;
     virtual bool        Close() override;
     virtual int         Seek(long int offset, SeekOrigin origin) override;

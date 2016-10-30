@@ -36,10 +36,7 @@
 
 #include <array>
 
-using namespace std;
-
 class CADAttdef;
-
 class CADAttrib;
 
 /**
@@ -54,7 +51,7 @@ public:
     void      scale( const CADVector& vector );
     CADVector multiply( const CADVector& vector ) const;
 protected:
-    array<double, 9> matrix;
+    std::array<double, 9> matrix;
 };
 
 /**
@@ -97,20 +94,20 @@ public:
     double            getThickness() const;
     void              setThickness( double thicknes );
     RGBColor          getColor() const;
-    void              setColor( RGBColor color );// TODO: in 2004+ ACI is not the only way to set the color.
+    void              setColor( RGBColor color ); // TODO: In 2004+ ACI is not the only way to set the color.
 
-    vector<CADAttrib> getBlockAttributes() const;
-    void              setBlockAttributes( const vector<CADAttrib>& value );
+    std::vector<CADAttrib> getBlockAttributes() const;
+    void              setBlockAttributes( const std::vector<CADAttrib>& value );
 
-    vector<string> getEED() const;
-    void           setEED( vector<string> eed );
+    std::vector<std::string> getEED() const;
+    void setEED( std::vector<std::string> eed );
 
     virtual void print() const                     = 0;
     virtual void transform( const Matrix& matrix ) = 0;
 protected:
-    vector<CADAttrib> blockAttributes; // attributes of block reference this geometry is attached to.
+    std::vector<CADAttrib> blockAttributes; // Attributes of block reference this geometry is attached to.
 
-    vector<string>    asEED;
+    std::vector<std::string>    asEED;
     enum GeometryType geometryType;
     double            thickness;
     RGBColor          geometry_color;
@@ -190,7 +187,7 @@ public:
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
-    vector<CADVector> vertexes;
+    std::vector<CADVector> vertexes;
 };
 
 /**
@@ -211,11 +208,11 @@ public:
     CADVector getVectExtrusion() const;
     void      setVectExtrusion( const CADVector& value );
 
-    vector<pair<double, double> > getWidths() const;
-    void                          setWidths( const vector<pair<double, double> >& value );
+    std::vector<std::pair<double, double> > getWidths() const;
+    void  setWidths( const std::vector<std::pair<double, double> >& value );
 
-    vector<double> getBulges() const;
-    void           setBulges( const vector<double>& value );
+    std::vector<double> getBulges() const;
+    void           setBulges( const std::vector<double>& value );
 
     bool isClosed() const;
     void setClosed( bool state );
@@ -226,8 +223,8 @@ protected:
     double                        constWidth;
     double                        elevation;
     CADVector                     vectExtrusion;
-    vector<double>                bulges;
-    vector<pair<double, double> > widths; // start, end.
+    std::vector<double>                bulges;
+    std::vector<std::pair<double, double> > widths; // Start & end.
 };
 
 /**
@@ -254,8 +251,8 @@ class CADText : public CADPoint3D
 public:
     CADText();
 
-    string getTextValue() const;
-    void   setTextValue( const string& value );
+    std::string getTextValue() const;
+    void   setTextValue( const std::string& value );
 
     double getHeight() const;
     void   setHeight( double value );
@@ -271,7 +268,7 @@ protected:
     double obliqueAngle;
     double rotationAngle;
     double height;
-    string textValue;
+    std::string textValue;
 };
 
 /**
@@ -331,9 +328,9 @@ public:
     bool isClosed() const;
     void setClosed( bool value );
 
-    vector<CADVector>& getControlPoints();
-    vector<CADVector>& getFitPoints();
-    vector<double>   & getControlPointsWeights();
+    std::vector<CADVector>& getControlPoints();
+    std::vector<CADVector>& getFitPoints();
+    std::vector<double>   & getControlPointsWeights();
 
     void addControlPointsWeight( double p_weight );
     void addControlPoint( const CADVector& point );
@@ -358,9 +355,9 @@ protected:
     double fitTollerance;
     long   degree;
 
-    vector<double>    ctrlPointsWeight;
-    vector<CADVector> avertCtrlPoints;
-    vector<CADVector> averFitPoints;
+    std::vector<double>    ctrlPointsWeight;
+    std::vector<CADVector> avertCtrlPoints;
+    std::vector<CADVector> averFitPoints;
 };
 
 /**
@@ -374,13 +371,13 @@ public:
     double getElevation() const;
     void   setElevation( double value );
     void   addCorner( const CADVector& corner );
-    vector<CADVector> getCorners();
+    std::vector<CADVector> getCorners();
 
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
     double            elevation;
-    vector<CADVector> avertCorners;
+    std::vector<CADVector> avertCorners;
 };
 
 /**
@@ -413,7 +410,7 @@ class CADImage : public CADGeometry
 {
 public:
     /**
-     * @brief enum which describes in which units Image resolutions is present 
+     * @brief enum which describes in which units Image resolutions is present
      */
     enum ResolutionUnit
     {
@@ -440,10 +437,11 @@ public:
     enum ResolutionUnit getResolutionUnits() const;
     void                setResolutionUnits( enum ResolutionUnit value );
 
-    string getFilePath() const;
-    void   setFilePath( const string& value );
+    std::string getFilePath() const;
+    void   setFilePath( const std::string& value );
 
-    void setOptions( bool transparency, bool clip, unsigned char brightness, unsigned char contrast );
+    void setOptions( bool transparency, bool clip, unsigned char brightness,
+                     unsigned char contrast );
 
     void addClippingPoint( const CADVector& pt );
 
@@ -464,14 +462,14 @@ protected:
     //char dFade;
 
     CADVector           imageSizeInPx;
-    string              filePath;
+    std::string         filePath;
     //bool bIsLoaded;
     enum ResolutionUnit resolutionUnits;
     //unsigned char       resolutionUnit; // 0 == none, 2 == centimeters, 5 == inches;
     CADVector           pixelSizeInACADUnits;
 
-    short             clippingBoundaryType; // 1 == rect, 2 == polygon
-    vector<CADVector> avertClippingPolygon;
+    short clippingBoundaryType; // 1 == rect, 2 == polygon
+    std::vector<CADVector> avertClippingPolygon;
 };
 
 /**
@@ -523,7 +521,7 @@ public:
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
-    vector<CADVector> avertCorners;
+    std::vector<CADVector> avertCorners;
     short             invisFlags;
 };
 
@@ -540,7 +538,7 @@ public:
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
-    vector<CADVector> vertexes;
+    std::vector<CADVector> vertexes;
 };
 
 /**
@@ -577,7 +575,7 @@ protected:
     //char dJust;
     bool              opened; // 1 == open, 0 == close
     // TODO: do we need more properties here?
-    vector<CADVector> avertVertexes;
+    std::vector<CADVector> avertVertexes;
 };
 
 /**
@@ -591,8 +589,8 @@ public:
     double getElevation() const;
     void   setElevation( double );
 
-    string getTag() const;
-    void   setTag( const string& );
+    std::string getTag() const;
+    void   setTag( const std::string& );
 
     CADVector getAlignmentPoint() const;
     void      setAlignmentPoint( const CADVector& );
@@ -605,7 +603,7 @@ public:
 protected:
     CADVector vertAlignmentPoint;
     double    dfElevation;
-    string    sTag;
+    std::string    sTag;
     bool      bLockPosition;
 };
 
@@ -617,19 +615,19 @@ class CADAttdef : public CADAttrib
 public:
     CADAttdef();
 
-    string getPrompt() const;
-    void   setPrompt( const string& );
+    std::string getPrompt() const;
+    void   setPrompt( const std::string& );
 
     virtual void print() const override;
 protected:
-    string sPrompt;
+    std::string sPrompt;
 };
 
 //class EXTERN LineType
 //{
 //public:
-//    string sEntryName;
-//    string sDescription;
+//    std::string sEntryName;
+//    std::string sDescription;
 //    double dfPatternLen;
 //    char dAlignment;
 //    char nNumDashes;
@@ -643,8 +641,8 @@ protected:
 //        double dfRotation;
 //        short dShapeflag;
 //    };
-//    vector < char > abyTextArea; // TODO: what is it?
-//    vector < CADHandle > hShapefiles; // TODO: one for each dash?
+//    std::vector < char > abyTextArea; // TODO: what is it?
+//    std::vector < CADHandle > hShapefiles; // TODO: one for each dash?
 //};
 
 //class EXTERN Block
@@ -655,11 +653,11 @@ protected:
 //        pstCADFile_m = pCADFile;
 //    }
 //
-//    string sBlockName;
+//    std::string sBlockName;
 //
 //    CADFile * pstCADFile_m;
 //
-//    vector < pair < long long, short > > astAttachedGeometries;
+//    std::vector < std::pair < long long, short > > astAttachedGeometries;
 //};
 
 

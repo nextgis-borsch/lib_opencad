@@ -39,12 +39,20 @@
 //------------------------------------------------------------------------------
 #define EPSILON std::numeric_limits<double>::epsilon() * 16
 
-CADVector::CADVector( double x, double y ) : X( x ), Y( y ), Z( 0.0 ), bHasZ( false )
+CADVector::CADVector( double x, double y ) :
+    X( x ),
+    Y( y ),
+    Z( 0.0 ),
+    bHasZ( false )
 {
 
 }
 
-CADVector::CADVector( double x, double y, double z ) : X( x ), Y( y ), Z( z ), bHasZ( true )
+CADVector::CADVector( double x, double y, double z ) :
+    X( x ),
+    Y( y ),
+    Z( z ),
+    bHasZ( true )
 {
 
 }
@@ -59,7 +67,8 @@ CADVector::CADVector( const CADVector& other )
 
 bool CADVector::operator==( const CADVector& second )
 {
-    return ( fcmp( this->X, second.X ) && fcmp( this->Y, second.Y ) && fcmp( this->Z, second.Z ) );
+    return ( fcmp( this->X, second.X ) && fcmp( this->Y, second.Y ) &&
+                                                    fcmp( this->Z, second.Z ) );
 }
 
 CADVector CADVector::operator=( const CADVector& second )
@@ -407,129 +416,138 @@ CADLWPolylineObject::CADLWPolylineObject()
 // CADSplineObject
 //------------------------------------------------------------------------------
 
-CADSplineObject::CADSplineObject() : nNumFitPts( 0 ), nNumKnots( 0 ), nNumCtrlPts( 0 ) // should be zeroed.
+CADSplineObject::CADSplineObject() :
+    nNumFitPts( 0 ),
+    nNumKnots( 0 ),
+    nNumCtrlPts( 0 ) // should be zeroed.
 {
     type = SPLINE;
 }
 
 //------------------------------------------------------------------------------
 
-const vector<char> CADCommonEntityObjectTypes{
-        CADObject::POINT, CADObject::ARC, CADObject::TEXT, CADObject::ELLIPSE, CADObject::CIRCLE, CADObject::LINE,
-        CADObject::LWPOLYLINE, CADObject::POLYLINE3D, CADObject::MLINE, CADObject::SPLINE, CADObject::SOLID,
-        CADObject::MTEXT, CADObject::IMAGE, CADObject::XLINE, CADObject::RAY, CADObject::MLINE, CADObject::FACE3D,
-        CADObject::POLYLINE_PFACE, CADObject::ATTRIB, CADObject::ATTDEF, CADObject::POLYLINE2D, CADObject::HATCH,
-        CADObject::INSERT, CADObject::VERTEX3D, CADObject::VERTEX2D, CADObject::VERTEX_MESH, CADObject::VERTEX_PFACE,
-        CADObject::VERTEX_PFACE_FACE, CADObject::TOLERANCE, CADObject::SOLID3D, CADObject::WIPEOUT, CADObject::TRACE,
-        CADObject::DIMENSION_ALIGNED, CADObject::OLE2FRAME
+const std::vector<char> CADCommonEntityObjectTypes{
+    CADObject::POINT, CADObject::ARC, CADObject::TEXT, CADObject::ELLIPSE,
+    CADObject::CIRCLE, CADObject::LINE, CADObject::LWPOLYLINE,
+    CADObject::POLYLINE3D, CADObject::MLINE, CADObject::SPLINE, CADObject::SOLID,
+    CADObject::MTEXT, CADObject::IMAGE, CADObject::XLINE, CADObject::RAY,
+    CADObject::MLINE, CADObject::FACE3D, CADObject::POLYLINE_PFACE,
+    CADObject::ATTRIB, CADObject::ATTDEF, CADObject::POLYLINE2D, CADObject::HATCH,
+    CADObject::INSERT, CADObject::VERTEX3D, CADObject::VERTEX2D,
+    CADObject::VERTEX_MESH, CADObject::VERTEX_PFACE, CADObject::VERTEX_PFACE_FACE,
+    CADObject::TOLERANCE, CADObject::SOLID3D, CADObject::WIPEOUT, CADObject::TRACE
 };
 
-const vector<char> CADSupportedGeometryTypes{
-        CADObject::POINT, CADObject::ARC, CADObject::TEXT, CADObject::ELLIPSE, CADObject::CIRCLE, CADObject::LINE,
-        CADObject::LWPOLYLINE, CADObject::POLYLINE3D, CADObject::MLINE, CADObject::ATTRIB, CADObject::ATTDEF,
-        CADObject::RAY, CADObject::SPLINE, CADObject::SOLID, CADObject::IMAGE, CADObject::MTEXT,
-        CADObject::POLYLINE_PFACE, CADObject::XLINE, CADObject::FACE3D
+const std::vector<char> CADSupportedGeometryTypes{
+    CADObject::POINT, CADObject::ARC, CADObject::TEXT, CADObject::ELLIPSE,
+    CADObject::CIRCLE, CADObject::LINE, CADObject::LWPOLYLINE,
+    CADObject::POLYLINE3D, CADObject::MLINE, CADObject::ATTRIB, CADObject::ATTDEF,
+    CADObject::RAY, CADObject::SPLINE, CADObject::SOLID, CADObject::IMAGE,
+    CADObject::MTEXT, CADObject::POLYLINE_PFACE, CADObject::XLINE,
+    CADObject::FACE3D
 };
 
 bool isCommonEntityType( short nType )
 {
-    return std::find( CADCommonEntityObjectTypes.begin(), CADCommonEntityObjectTypes.end(), ( nType ) ) !=
-           CADCommonEntityObjectTypes.end();
+    return std::find( CADCommonEntityObjectTypes.begin(),
+                      CADCommonEntityObjectTypes.end(),
+                      nType ) != CADCommonEntityObjectTypes.end();
 }
 
 bool isSupportedGeometryType( short nType )
 {
-    return std::find( CADSupportedGeometryTypes.begin(), CADSupportedGeometryTypes.end(), ( nType ) ) !=
-            CADSupportedGeometryTypes.end();
+    return std::find( CADSupportedGeometryTypes.begin(),
+                      CADSupportedGeometryTypes.end(),
+                      nType ) !=  CADSupportedGeometryTypes.end();
 }
 
-const map<char, string> CADObjectNames{
-        { CADObject::UNUSED,               "UNUSED" },
-        { CADObject::TEXT,                 "TEXT" },
-        { CADObject::ATTRIB,               "ATTRIB" },
-        { CADObject::ATTDEF,               "ATTDEF" },
-        { CADObject::BLOCK,                "BLOCK" },
-        { CADObject::ENDBLK,               "ENDBLK" },
-        { CADObject::SEQEND,               "SEQEND" },
-        { CADObject::INSERT,               "INSERT" },
-        { CADObject::MINSERT1,             "MINSERT" },
-        { CADObject::MINSERT2,             "MINSERT" },
-        { CADObject::VERTEX2D,             "VERTEX 2D" },
-        { CADObject::VERTEX3D,             "VERTEX 3D" },
-        { CADObject::VERTEX_MESH,          "VERTEX MESH" },
-        { CADObject::VERTEX_PFACE,         "VERTEX PFACE" },
-        { CADObject::VERTEX_PFACE_FACE,    "VERTEX PFACE FACE" },
-        { CADObject::POLYLINE2D,           "POLYLINE 2D" },
-        { CADObject::POLYLINE3D,           "POLYLINE 3D" },
-        { CADObject::ARC,                  "ARC" },
-        { CADObject::CIRCLE,               "CIRCLE" },
-        { CADObject::LINE,                 "LINE" },
-        { CADObject::DIMENSION_ORDINATE,   "DIMENSION ORDINATE" },
-        { CADObject::DIMENSION_LINEAR,     "DIMENSION LINEAR" },
-        { CADObject::DIMENSION_ALIGNED,    "DIMENSION ALIGNED" },
-        { CADObject::DIMENSION_ANG_3PT,    "DIMENSION ANG 3PT" },
-        { CADObject::DIMENSION_ANG_2LN,    "DIMENSION AND 2LN" },
-        { CADObject::DIMENSION_RADIUS,     "DIMENSION RADIUS" },
-        { CADObject::DIMENSION_DIAMETER,   "DIMENSION DIAMETER" },
-        { CADObject::POINT,                "POINT" },
-        { CADObject::FACE3D,               "3DFACE" },
-        { CADObject::POLYLINE_PFACE,       "POLYLINE PFACE" },
-        { CADObject::POLYLINE_MESH,        "POLYLINE MESH" },
-        { CADObject::SOLID,                "SOLID" },
-        { CADObject::TRACE,                "TRACE" },
-        { CADObject::SHAPE,                "SHAPE" },
-        { CADObject::VIEWPORT,             "VIEWPORT" },
-        { CADObject::ELLIPSE,              "ELLIPSE" },
-        { CADObject::SPLINE,               "SPLINE" },
-        { CADObject::REGION,               "REGION" },
-        { CADObject::SOLID3D,              "3DSOLID" },
-        { CADObject::BODY,                 "BODY" },
-        { CADObject::RAY,                  "RAY" },
-        { CADObject::XLINE,                "XLINE" },
-        { CADObject::DICTIONARY,           "DICTIONARY" },
-        { CADObject::OLEFRAME,             "OLEFRAME" },
-        { CADObject::MTEXT,                "MTEXT" },
-        { CADObject::LEADER,               "LEADER" },
-        { CADObject::TOLERANCE,            "TOLERANCE" },
-        { CADObject::MLINE,                "MLINE" },
-        { CADObject::BLOCK_CONTROL_OBJ,    "BLOCK CONTROL OBJ" },
-        { CADObject::BLOCK_HEADER,         "BLOCK HEADER" },
-        { CADObject::LAYER_CONTROL_OBJ,    "LAYER CONTROL OBJ" },
-        { CADObject::LAYER,                "LAYER" },
-        { CADObject::STYLE_CONTROL_OBJ,    "STYLE CONTROL OBJ" },
-        { CADObject::STYLE1,               "STYLE1" },
-        { CADObject::STYLE2,               "STYLE2" },
-        { CADObject::STYLE3,               "STYLE3" },
-        { CADObject::LTYPE_CONTROL_OBJ,    "LTYPE CONTROL OBJ" },
-        { CADObject::LTYPE1,               "LTYPE1" },
-        { CADObject::LTYPE2,               "LTYPE2" },
-        { CADObject::LTYPE3,               "LTYPE3" },
-        { CADObject::VIEW_CONTROL_OBJ,     "VIEW CONTROL OBJ" },
-        { CADObject::VIEW,                 "VIEW" },
-        { CADObject::UCS_CONTROL_OBJ,      "UCS CONTROL OBJ" },
-        { CADObject::UCS,                  "UCS" },
-        { CADObject::VPORT_CONTROL_OBJ,    "VPORT CONTROL OBJ" },
-        { CADObject::VPORT,                "VPORT" },
-        { CADObject::APPID_CONTROL_OBJ,    "APPID CONTROL OBJ" },
-        { CADObject::APPID,                "APPID" },
-        { CADObject::DIMSTYLE_CONTROL_OBJ, "DIMSTYLE CONTROL OBJ" },
-        { CADObject::DIMSTYLE,             "DIMSTYLE" },
-        { CADObject::VP_ENT_HDR_CTRL_OBJ,  "VP ENT HDR CTRL OBJ" },
-        { CADObject::VP_ENT_HDR,           "VP ENT HDR" },
-        { CADObject::GROUP,                "GROUP" },
-        { CADObject::MLINESTYLE,           "MLINESTYLE" },
-        { CADObject::OLE2FRAME,            "OLE2FRAME" },
-        { CADObject::DUMMY,                "DUMMY" },
-        { CADObject::LONG_TRANSACTION,     "LONG TRANSACTION" },
-        { CADObject::LWPOLYLINE,           "LWPOLYLINE" },
-        { CADObject::HATCH,                "HATCH" },
-        { CADObject::XRECORD,              "XRECORD" },
-        { CADObject::ACDBPLACEHOLDER,      "ACDBPLACEHOLDER" },
-        { CADObject::VBA_PROJECT,          "VBA PROJECT" },
-        { CADObject::LAYOUT,               "LAYOUT" }
+const std::map<char, std::string> CADObjectNames{
+    { CADObject::UNUSED,               "UNUSED" },
+    { CADObject::TEXT,                 "TEXT" },
+    { CADObject::ATTRIB,               "ATTRIB" },
+    { CADObject::ATTDEF,               "ATTDEF" },
+    { CADObject::BLOCK,                "BLOCK" },
+    { CADObject::ENDBLK,               "ENDBLK" },
+    { CADObject::SEQEND,               "SEQEND" },
+    { CADObject::INSERT,               "INSERT" },
+    { CADObject::MINSERT1,             "MINSERT" },
+    { CADObject::MINSERT2,             "MINSERT" },
+    { CADObject::VERTEX2D,             "VERTEX 2D" },
+    { CADObject::VERTEX3D,             "VERTEX 3D" },
+    { CADObject::VERTEX_MESH,          "VERTEX MESH" },
+    { CADObject::VERTEX_PFACE,         "VERTEX PFACE" },
+    { CADObject::VERTEX_PFACE_FACE,    "VERTEX PFACE FACE" },
+    { CADObject::POLYLINE2D,           "POLYLINE 2D" },
+    { CADObject::POLYLINE3D,           "POLYLINE 3D" },
+    { CADObject::ARC,                  "ARC" },
+    { CADObject::CIRCLE,               "CIRCLE" },
+    { CADObject::LINE,                 "LINE" },
+    { CADObject::DIMENSION_ORDINATE,   "DIMENSION ORDINATE" },
+    { CADObject::DIMENSION_LINEAR,     "DIMENSION LINEAR" },
+    { CADObject::DIMENSION_ALIGNED,    "DIMENSION ALIGNED" },
+    { CADObject::DIMENSION_ANG_3PT,    "DIMENSION ANG 3PT" },
+    { CADObject::DIMENSION_ANG_2LN,    "DIMENSION AND 2LN" },
+    { CADObject::DIMENSION_RADIUS,     "DIMENSION RADIUS" },
+    { CADObject::DIMENSION_DIAMETER,   "DIMENSION DIAMETER" },
+    { CADObject::POINT,                "POINT" },
+    { CADObject::FACE3D,               "3DFACE" },
+    { CADObject::POLYLINE_PFACE,       "POLYLINE PFACE" },
+    { CADObject::POLYLINE_MESH,        "POLYLINE MESH" },
+    { CADObject::SOLID,                "SOLID" },
+    { CADObject::TRACE,                "TRACE" },
+    { CADObject::SHAPE,                "SHAPE" },
+    { CADObject::VIEWPORT,             "VIEWPORT" },
+    { CADObject::ELLIPSE,              "ELLIPSE" },
+    { CADObject::SPLINE,               "SPLINE" },
+    { CADObject::REGION,               "REGION" },
+    { CADObject::SOLID3D,              "3DSOLID" },
+    { CADObject::BODY,                 "BODY" },
+    { CADObject::RAY,                  "RAY" },
+    { CADObject::XLINE,                "XLINE" },
+    { CADObject::DICTIONARY,           "DICTIONARY" },
+    { CADObject::OLEFRAME,             "OLEFRAME" },
+    { CADObject::MTEXT,                "MTEXT" },
+    { CADObject::LEADER,               "LEADER" },
+    { CADObject::TOLERANCE,            "TOLERANCE" },
+    { CADObject::MLINE,                "MLINE" },
+    { CADObject::BLOCK_CONTROL_OBJ,    "BLOCK CONTROL OBJ" },
+    { CADObject::BLOCK_HEADER,         "BLOCK HEADER" },
+    { CADObject::LAYER_CONTROL_OBJ,    "LAYER CONTROL OBJ" },
+    { CADObject::LAYER,                "LAYER" },
+    { CADObject::STYLE_CONTROL_OBJ,    "STYLE CONTROL OBJ" },
+    { CADObject::STYLE1,               "STYLE1" },
+    { CADObject::STYLE2,               "STYLE2" },
+    { CADObject::STYLE3,               "STYLE3" },
+    { CADObject::LTYPE_CONTROL_OBJ,    "LTYPE CONTROL OBJ" },
+    { CADObject::LTYPE1,               "LTYPE1" },
+    { CADObject::LTYPE2,               "LTYPE2" },
+    { CADObject::LTYPE3,               "LTYPE3" },
+    { CADObject::VIEW_CONTROL_OBJ,     "VIEW CONTROL OBJ" },
+    { CADObject::VIEW,                 "VIEW" },
+    { CADObject::UCS_CONTROL_OBJ,      "UCS CONTROL OBJ" },
+    { CADObject::UCS,                  "UCS" },
+    { CADObject::VPORT_CONTROL_OBJ,    "VPORT CONTROL OBJ" },
+    { CADObject::VPORT,                "VPORT" },
+    { CADObject::APPID_CONTROL_OBJ,    "APPID CONTROL OBJ" },
+    { CADObject::APPID,                "APPID" },
+    { CADObject::DIMSTYLE_CONTROL_OBJ, "DIMSTYLE CONTROL OBJ" },
+    { CADObject::DIMSTYLE,             "DIMSTYLE" },
+    { CADObject::VP_ENT_HDR_CTRL_OBJ,  "VP ENT HDR CTRL OBJ" },
+    { CADObject::VP_ENT_HDR,           "VP ENT HDR" },
+    { CADObject::GROUP,                "GROUP" },
+    { CADObject::MLINESTYLE,           "MLINESTYLE" },
+    { CADObject::OLE2FRAME,            "OLE2FRAME" },
+    { CADObject::DUMMY,                "DUMMY" },
+    { CADObject::LONG_TRANSACTION,     "LONG TRANSACTION" },
+    { CADObject::LWPOLYLINE,           "LWPOLYLINE" },
+    { CADObject::HATCH,                "HATCH" },
+    { CADObject::XRECORD,              "XRECORD" },
+    { CADObject::ACDBPLACEHOLDER,      "ACDBPLACEHOLDER" },
+    { CADObject::VBA_PROJECT,          "VBA PROJECT" },
+    { CADObject::LAYOUT,               "LAYOUT" }
 };
 
-string getNameByType( CADObject::ObjectType eType )
+std::string getNameByType( CADObject::ObjectType eType )
 {
     auto it = CADObjectNames.find( eType );
     if( it == CADObjectNames.end() )

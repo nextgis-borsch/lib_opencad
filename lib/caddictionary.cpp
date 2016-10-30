@@ -31,16 +31,16 @@
 
 #include "caddictionary.h"
 
+using namespace std;
 //
 // CADDictionaryRecord
 //
 
-CADDictionaryRecord::CADDictionaryRecord ()
+CADDictionaryRecord::CADDictionaryRecord()
 {
-
 }
 
-CADObject::ObjectType CADDictionaryRecord::getType () const
+CADObject::ObjectType CADDictionaryRecord::getType() const
 {
     return objType;
 }
@@ -49,17 +49,17 @@ CADObject::ObjectType CADDictionaryRecord::getType () const
 // CADXRecord
 //
 
-CADXRecord::CADXRecord ()
+CADXRecord::CADXRecord()
 {
     objType = CADObject::XRECORD;
 }
 
-const string& CADXRecord::getRecordData () const
+const string CADXRecord::getRecordData() const
 {
     return sRecordData;
 }
 
-void CADXRecord::setRecordData ( const string &data )
+void CADXRecord::setRecordData( const string& data )
 {
     sRecordData = data;
 }
@@ -68,12 +68,12 @@ void CADXRecord::setRecordData ( const string &data )
 // CADDictionary
 //
 
-CADDictionary::CADDictionary ()
+CADDictionary::CADDictionary()
 {
     objType = CADObject::DICTIONARY;
 }
 
-CADDictionary::~CADDictionary ()
+CADDictionary::~CADDictionary()
 {
     for( size_t i = 0; i < astXRecords.size(); ++i )
     {
@@ -82,17 +82,33 @@ CADDictionary::~CADDictionary ()
     }
 }
 
-size_t CADDictionary::getRecordsCount ()
+size_t CADDictionary::getRecordsCount()
 {
     return astXRecords.size();
 }
 
-pair< string, CADDictionaryRecord*>& CADDictionary::getRecord ( size_t index )
+CADDictionaryItem CADDictionary::getRecord( size_t index )
 {
     return astXRecords[index];
 }
 
-void CADDictionary::addRecord ( pair<string, CADDictionaryRecord *> record )
+void CADDictionary::addRecord( CADDictionaryItem record )
 {
     astXRecords.emplace_back( record );
+}
+
+string CADDictionary::getRecordByName(const string& name) const
+{
+    for( size_t i = 0; i < astXRecords.size(); ++i )
+    {
+        if( astXRecords[i].first.compare(name) == 0 )
+        {
+            CADDictionaryRecord* poRecord = astXRecords[i].second;
+            if(poRecord == nullptr || poRecord->getType() != CADObject::XRECORD)
+                continue;
+            CADXRecord * poXRecord = ( CADXRecord* ) poRecord;
+            return poXRecord->getRecordData();
+        }
+    }
+    return "";
 }
