@@ -47,6 +47,8 @@ public:
     bool isNull() const;
     long getAsLong() const;
     long getAsLong( const CADHandle& ref_handle ) const;
+private:
+    long getAsLong(const std::vector<unsigned char>& handle) const;
 protected:
     unsigned char              code;
     std::vector<unsigned char> handleOrOffset;
@@ -77,13 +79,13 @@ public:
     long                getDecimal() const;
     double              getReal() const;
     const std::string&  getString() const;
-    DataType       getType() const;
+    DataType            getType() const;
     double              getX() const;
     double              getY() const;
     double              getZ() const;
     const CADHandle&    getHandle() const;
 protected:
-    DataType       type;
+    DataType            type;
     long                decimalVal;
     double              xVal;
     double              yVal;
@@ -338,7 +340,7 @@ public:
                               0 = Off
                               1 = On */
         DRAGVS, /**< Hard-pointer ID to visual style while creating 3D
-                              solid primitives. The defualt value is NULL */
+                              solid primitives. The default value is NULL */
         DWGCODEPAGE, /**< Drawing code page; set to the system code page
                               when a new drawing is created, but not otherwise
                               maintained by AutoCAD */
@@ -678,7 +680,7 @@ public:
      */
     int              addValue( short code, const CADVariant& val );
     int              addValue( short code, const char * val );
-    int              addValue( short code, long val );
+    //int              addValue( short code, long val );
     int              addValue( short code, int val );
     int              addValue( short code, short val );
     int              addValue( short code, double val );

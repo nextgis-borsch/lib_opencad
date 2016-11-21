@@ -28,12 +28,13 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
-#include <dwg/io.h>
 #include "cadheader.h"
 #include "opencad_api.h"
+#include "dwg/io.h"
 
 #include <cstring>
 #include <iostream>
+#include <time.h>
 
 using namespace std;
 
@@ -140,7 +141,7 @@ static const CADHeaderConstantDetail CADHeaderConstantDetails[]{
         FillCADConstantDetail( USERR4, 40 ), FillCADConstantDetail( USERR5, 40 ), FillCADConstantDetail( USRTIMER, 70 ),
         FillCADConstantDetail( VERSIONGUID, 2 ), FillCADConstantDetail( VISRETAIN, 70 ),
         FillCADConstantDetail( WORLDVIEW, 70 ), FillCADConstantDetail( XCLIPFRAME, 290 ),
-        FillCADConstantDetail( XEDIT, 290 ), { -1, -1, NULL }
+        FillCADConstantDetail( XEDIT, 290 ), { -1, -1, nullptr }
 };
 
 //------------------------------------------------------------------------------
@@ -151,10 +152,10 @@ CADHandle::CADHandle( unsigned char codeIn ) : code( codeIn )
 {
 }
 
-CADHandle::CADHandle( const CADHandle& other )
+CADHandle::CADHandle( const CADHandle& other ) :
+    code( other.code ),
+    handleOrOffset( other.handleOrOffset )
 {
-    code           = other.code;
-    handleOrOffset = other.handleOrOffset;
 }
 
 CADHandle& CADHandle::operator=( const CADHandle& other )
@@ -173,43 +174,41 @@ void CADHandle::addOffset( unsigned char val )
 
 long CADHandle::getAsLong( const CADHandle& ref_handle ) const
 {
-    long result = 0;
     switch( code )
     {
         case 0x06:
         {
-            memcpy( & result, ref_handle.handleOrOffset.data(), ref_handle.handleOrOffset.size() );
-            SwapEndianness( result, ref_handle.handleOrOffset.size() );
-            return result + 1;
+            return getAsLong(ref_handle.handleOrOffset) + 1;
         }
         case 0x08:
         {
-            memcpy( & result, ref_handle.handleOrOffset.data(), ref_handle.handleOrOffset.size() );
-            SwapEndianness( result, ref_handle.handleOrOffset.size() );
-            return result - 1;
+            return getAsLong(ref_handle.handleOrOffset) - 1;
         }
         case 0x0A:
         {
-            memcpy( & result, ref_handle.handleOrOffset.data(), ref_handle.handleOrOffset.size() );
-            SwapEndianness( result, ref_handle.handleOrOffset.size() );
-            return result + this->getAsLong();
+            return getAsLong(ref_handle.handleOrOffset) + getAsLong(handleOrOffset);
         }
         case 0x0C:
         {
-            memcpy( & result, ref_handle.handleOrOffset.data(), ref_handle.handleOrOffset.size() );
-            SwapEndianness( result, ref_handle.handleOrOffset.size() );
-            return result - this->getAsLong();
+            return getAsLong(ref_handle.handleOrOffset) - getAsLong(handleOrOffset);
         }
     }
 
-    return this->getAsLong();
+    return getAsLong(handleOrOffset);
 }
 
 long CADHandle::getAsLong() const
 {
+    return getAsLong(handleOrOffset);
+}
+
+long CADHandle::getAsLong(const std::vector<unsigned char>& handle) const
+{
     long result = 0;
-    memcpy( & result, handleOrOffset.data(), handleOrOffset.size() );
-    SwapEndianness( result, handleOrOffset.size() );
+    if( handle.empty() )
+        return result;
+    memcpy( &result, handle.data(), handle.size() );
+    SwapEndianness( result, handle.size() );
     return result;
 }
 
@@ -222,126 +221,119 @@ bool CADHandle::isNull() const
 // CADVariant
 //------------------------------------------------------------------------------
 
-CADVariant::CADVariant()
+CADVariant::CADVariant() :
+    type        ( DataType::INVALID ),
+    decimalVal  ( 0 ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    dateTimeVal ( 0 )
 {
-    type        = DataType::INVALID;
-    decimalVal  = 0;
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( const char * val )
+CADVariant::CADVariant( const char * val ) :
+    type        ( DataType::STRING ),
+    decimalVal  ( 0 ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( string( val ) ),
+    dateTimeVal ( 0 )
 {
-    type        = DataType::STRING;
-    stringVal   = string( val );
-    decimalVal  = 0;
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( int val )
+CADVariant::CADVariant( int val ) :
+    type        ( DataType::DECIMAL ),
+    decimalVal  ( val ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( to_string( val ) ),
+    dateTimeVal ( 0 )
 {
-    type        = DataType::DECIMAL;
-    decimalVal  = val;
-    stringVal   = to_string( decimalVal );
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( short val )
+CADVariant::CADVariant( short val ) :
+    type        ( DataType::DECIMAL ),
+    decimalVal  ( val ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( to_string( val ) ),
+    dateTimeVal ( 0 )
 {
-    type        = DataType::DECIMAL;
-    decimalVal  = val;
-    stringVal   = to_string( decimalVal );
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( double val )
+CADVariant::CADVariant( double val ) :
+    type        ( DataType::REAL ),
+    decimalVal  ( 0 ),
+    xVal        ( val ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( to_string( val ) ),
+    dateTimeVal ( 0 )
 {
-    type        = DataType::REAL;
-    xVal        = val;
-    stringVal   = to_string( xVal );
-    decimalVal  = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( double x, double y, double z )
+CADVariant::CADVariant( double x, double y, double z ) :
+    type        ( DataType::COORDINATES ),
+    decimalVal  ( 0 ),
+    xVal        ( x ),
+    yVal        ( y ),
+    zVal        ( z ),
+    dateTimeVal ( 0 )
 {
-    type = DataType::COORDINATES;
-    xVal = x;
-    yVal = y;
-    zVal = z;
-
     char str_buff[256];
     snprintf( str_buff, 255, "[%f,%f,%f]", x, y, z );
     stringVal = str_buff;
-
-    decimalVal  = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( const string& val )
+CADVariant::CADVariant( const string& val ) :
+    type        ( DataType::STRING ),
+    decimalVal  ( 0 ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( val ),
+    dateTimeVal ( 0 )
 {
-    type      = DataType::STRING;
-    stringVal = val;
-
-    decimalVal  = 0;
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( time_t val )
+CADVariant::CADVariant( time_t val ) :
+    type        ( DataType::DATETIME ),
+    decimalVal  ( 0 ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    dateTimeVal ( val )
 {
-    type        = DataType::DATETIME;
-    dateTimeVal = val;
-
-    //TODO: data/time format
     char str_buff[256];
-    snprintf( str_buff, 255, "%ld", dateTimeVal );
+    strftime(str_buff, 255, "%Y-%m-%d %H:%M:%S", localtime(&dateTimeVal));
     stringVal = str_buff;
-
-    decimalVal = 0;
-    xVal       = 0;
-    yVal       = 0;
-    zVal       = 0;
 }
 
-CADVariant::CADVariant( const CADHandle& val )
+CADVariant::CADVariant( const CADHandle& val ) :
+    type        ( DataType::HANDLE ),
+    decimalVal  ( 0 ),
+    xVal        ( 0 ),
+    yVal        ( 0 ),
+    zVal        ( 0 ),
+    stringVal   ( to_string( val.getAsLong() ) ),
+    handleVal   ( val ),
+    dateTimeVal ( 0 )
 {
-    type      = DataType::HANDLE;
-    handleVal = val;
-    stringVal = to_string( val.getAsLong() );
-
-    decimalVal  = 0;
-    xVal        = 0;
-    yVal        = 0;
-    zVal        = 0;
-    dateTimeVal = 0;
 }
 
-CADVariant::CADVariant( const CADVariant& orig )
+CADVariant::CADVariant( const CADVariant& orig ) :
+    type        ( orig.type ),
+    decimalVal  ( orig.decimalVal ),
+    xVal        ( orig.xVal ),
+    yVal        ( orig.yVal ),
+    zVal        ( orig.zVal ),
+    stringVal   ( orig.stringVal ),
+    handleVal   ( orig.handleVal ),
+    dateTimeVal ( orig.dateTimeVal )
 {
-    type        = orig.type;
-    stringVal   = orig.stringVal;
-    decimalVal  = orig.decimalVal;
-    xVal        = orig.xVal;
-    yVal        = orig.yVal;
-    zVal        = orig.zVal;
-    handleVal   = orig.handleVal;
-    dateTimeVal = orig.dateTimeVal;
 }
 
 CADVariant& CADVariant::operator=( const CADVariant& orig )
@@ -420,12 +412,12 @@ int CADHeader::addValue( short code, const char * val )
 {
     return addValue( code, CADVariant( val ) );
 }
-
+/*
 int CADHeader::addValue( short code, long val )
 {
     return addValue( code, CADVariant( val ) );
 }
-
+*/
 int CADHeader::addValue( short code, int val )
 {
     return addValue( code, CADVariant( val ) );
@@ -461,9 +453,11 @@ int CADHeader::addValue( short code, long julianday, long milliseconds )
     // unix -> julian        return ( unixSecs / 86400.0 ) + 2440587.5;
     // julian -> unix        return (julian - 2440587.5) * 86400.0
 
-    double seconds     = double( milliseconds ) / 1000;
-    double unix        = ( double( julianday ) - 2440587.5 ) * 86400.0;
-    time_t fullSeconds = static_cast<time_t>(unix + seconds);
+    double dfSeconds = double( milliseconds ) / 1000;
+	double dfUnix = 0;
+	if(julianday != 0)
+		dfUnix = ( double( julianday ) - 2440587.5 ) * 86400.0;
+    time_t fullSeconds = static_cast<time_t>( dfUnix + dfSeconds );
     return addValue( code, CADVariant( fullSeconds ) );
 }
 

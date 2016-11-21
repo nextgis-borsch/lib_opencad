@@ -46,11 +46,11 @@ using namespace std;
 static int Usage(const char* pszErrorMsg = nullptr)
 {
     cout << "Usage: cadinfo [--summary][--help][--formats][--version]\n"
-            "               file_name" << endl;
+            "               file_name \n";
 
     if( pszErrorMsg != nullptr )
     {
-        cerr << endl << "FAILURE: " << pszErrorMsg << endl;
+        cerr << "\nFAILURE: " << pszErrorMsg << "\n";
         return EXIT_FAILURE;
     }
 
@@ -60,16 +60,16 @@ static int Usage(const char* pszErrorMsg = nullptr)
 static int Version()
 {
     cout << "cadinfo was compiled against libopencad "
-         << OCAD_VERSION << endl
+         << OCAD_VERSION << "\n"
               << "and is running against libopencad "
-         << GetVersionString() << endl;
+         << GetVersionString() << "\n";
 
     return EXIT_SUCCESS;
 }
 
 static int Formats()
 {
-    cerr << GetCADFormats() << endl;
+    cerr << GetCADFormats() << "\n";
 
     return EXIT_SUCCESS;
 }
@@ -112,35 +112,37 @@ int main(int argc, char *argv[])
 
     if (pCADFile == nullptr)
     {
-        cerr << "Open CAD file " << (pszCADFilePath == NULL ? "NULL" : pszCADFilePath) << " failed." << endl;
+        cerr << "Open CAD file " << (pszCADFilePath == NULL ? "NULL" : pszCADFilePath) << " failed.\n";
         return EXIT_FAILURE;
     }
 
     const CADHeader& header = pCADFile->getHeader ();
     header.print ();
-    cout << endl;
+    cout << "\n";
 
     const CADClasses& classes = pCADFile->getClasses ();
     classes.print ();
-    cout << endl;
+    cout << "\n";
 
     // print NOD info
-    cout << "Named Object Dictionary records:" << endl;
+    cout << "Named Object Dictionary records:\n";
     CADDictionary oNOD = pCADFile->GetNOD();
     for( size_t i = 0; i < oNOD.getRecordsCount (); ++i )
     {
         cout << "RECORD TYPE: ";
-        if( oNOD.getRecord (i).second->getType () == CADObject::ObjectType::XRECORD ) cout << "XRECORD ";
-        else if( oNOD.getRecord (i).second->getType () == CADObject::ObjectType::DICTIONARY ) cout << "DICTIONARY ";
+        if( oNOD.getRecord (i).second->getType () == CADObject::ObjectType::XRECORD ) 
+            cout << "XRECORD ";
+        else if( oNOD.getRecord (i).second->getType () == CADObject::ObjectType::DICTIONARY ) 
+            cout << "DICTIONARY ";
 
-        cout << "RECORD NAME: " << oNOD.getRecord (i).first << endl;
+        cout << "RECORD NAME: " << oNOD.getRecord (i).first << "\n";
         if( oNOD.getRecord (i).second->getType () == CADObject::ObjectType::XRECORD )
         {
-            CADXRecord * cadxRecord = ( CADXRecord* )oNOD.getRecord (i).second;
-            cout << "DATA: " << cadxRecord->getRecordData () << endl;
+            CADXRecord * cadxRecord = static_cast<CADXRecord*>(oNOD.getRecord (i).second.get());
+            cout << "DATA: " << cadxRecord->getRecordData () << "\n";
         }
     }
-    cout << endl;
+    cout << "\n";
 
     int attdefCount = 0;
     int attribCount = 0;
@@ -161,21 +163,21 @@ int main(int argc, char *argv[])
     int pointCount = 0;
     int arcCount = 0;
     int textCount = 0;
-    cout << "Layers count: " << pCADFile->GetLayersCount() << endl;
+    cout << "Layers count: " << pCADFile->GetLayersCount() << "\n";
 
     size_t i,j;
     for ( i = 0; i < pCADFile->GetLayersCount(); ++i )
     {
         CADLayer &layer = pCADFile->GetLayer( i );
         cout << i+1 << ". Layer " << layer.getName () << " contains "
-             << layer.getGeometryCount () << " geometries" << endl;
+             << layer.getGeometryCount () << " geometries\n";
 
         auto attribs = layer.getAttributesTags ();
         if(!attribs.empty ())
-            cout << "Layer attributes:" << endl;
+            cout << "Layer attributes:\n";
         for( const auto& attr : attribs )
         {
-            cout << "Attribute: [" << attr << "]" << endl;
+            cout << "Attribute: [" << attr << "]\n";
         }
 
         for ( j = 0; j < layer.getGeometryCount (); ++j )
@@ -199,8 +201,8 @@ int main(int argc, char *argv[])
             auto geom_attrs = geom->getBlockAttributes ();
             for( const auto& attdef : geom_attrs )
             {
-                cout << "Attrib name: " << attdef.getTag () << endl;
-                cout << "Attrib val: " << attdef.getTextValue () << endl;
+                cout << "Attrib name: " << attdef.getTag ()
+                     << "\nAttrib val: " << attdef.getTextValue () << "\n";
             }
 
             switch ( geom->getType() )
@@ -292,26 +294,26 @@ int main(int argc, char *argv[])
         }
     }
 
-    cout << "\n============== geometry summary ==============" << endl;
-    cout << "Polylines Pface: " << polylinesPface << endl;
-    cout << "3DFaces: " << face3dsCount << endl;
-    cout << "Rays: " << raysCount << endl;
-    cout << "XLines: " << xlinesCount << endl;
-    cout << "MLines: " << mlinesCount << endl;
-    cout << "MTexts: " << mtextsCount << endl;
-    cout << "Images: " << imagesCount << endl;
-    cout << "Solids: " << solidsCount << endl;
-    cout << "Points: " << pointCount << endl;
-    cout << "Ellipses: " << ellipsesCount << endl;
-    cout << "Lines count: " << linesCount << endl;
-    cout << "Plines count: " << plineCount << endl;
-    cout << "Plines3d count: " << pline3dCount << endl;
-    cout << "Splines count: " << splinesCount << endl;
-    cout << "Circles count: " << circlesCount << endl;
-    cout << "Arcs count: " << arcCount << endl;
-    cout << "Texts count: " << textCount << endl;
-    cout << "Attdefs count: " << attdefCount << endl;
-    cout << "Attribs count: " << attribCount << endl;
+    cout << "\n============== geometry summary =============="
+         << "\nPolylines Pface: " << polylinesPface
+         << "\n3DFaces: " << face3dsCount
+         << "\nRays: " << raysCount
+         << "\nXLines: " << xlinesCount
+         << "\nMLines: " << mlinesCount
+         << "\nMTexts: " << mtextsCount
+         << "\nImages: " << imagesCount
+         << "\nSolids: " << solidsCount
+         << "\nPoints: " << pointCount
+         << "\nEllipses: " << ellipsesCount
+         << "\nLines count: " << linesCount
+         << "\nPlines count: " << plineCount
+         << "\nPlines3d count: " << pline3dCount
+         << "\nSplines count: " << splinesCount
+         << "\nCircles count: " << circlesCount
+         << "\nArcs count: " << arcCount
+         << "\nTexts count: " << textCount
+         << "\nAttdefs count: " << attdefCount
+         << "\nAttribs count: " << attribCount << "\n";
 
     delete( pCADFile );
 }

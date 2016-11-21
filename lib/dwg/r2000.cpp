@@ -28,15 +28,15 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  *******************************************************************************/
-#include "r2000.h"
-#include "io.h"
 #include "cadgeometry.h"
 #include "cadobjects.h"
+#include "io.h"
 #include "opencad_api.h"
+#include "r2000.h"
 
-#include <iostream>
-#include <cstring>
 #include <cassert>
+#include <cstring>
+#include <iostream>
 #include <memory>
 
 #ifdef __APPLE__
@@ -68,8 +68,9 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     size_t dHeaderVarsSectionLength = 0;
 
     pFileIO->Seek( sectionLocatorRecords[0].dSeeker, CADFileIO::SeekOrigin::BEG );
-    pFileIO->Read( buffer, DWGSentinelLength );
-    if( memcmp( buffer, DWGHeaderVariablesStart, DWGSentinelLength ) )
+    pFileIO->Read( buffer, DWGConstants::SentinelLength );
+    if( memcmp( buffer, DWGConstants::HeaderVariablesStart,
+                        DWGConstants::SentinelLength ) )
     {
         DebugMsg( "File is corrupted (wrong pointer to HEADER_VARS section,"
                           "or HEADERVARS starting sentinel corrupted.)" );
@@ -78,7 +79,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     }
 
     pFileIO->Read( & dHeaderVarsSectionLength, 4 );
-    DebugMsg( "Header variables section length: %zd\n", dHeaderVarsSectionLength );
+        DebugMsg( "Header variables section length: %d\n",
+                  static_cast<int>(dHeaderVarsSectionLength) );
 
     size_t nBitOffsetFromStart = 0;
     pabyBuf = new char[dHeaderVarsSectionLength + 4];
@@ -564,14 +566,15 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     {
         int Flags = ReadBITLONG( pabyBuf, nBitOffsetFromStart );
         oHeader.addValue( CADHeader::CELWEIGHT, Flags & 0x001F );
-        oHeader.addValue( CADHeader::ENDCAPS, static_cast<bool>(Flags & 0x0060) );
-        oHeader.addValue( CADHeader::JOINSTYLE, static_cast<bool>(Flags & 0x0180) );
-        oHeader.addValue( CADHeader::LWDISPLAY, static_cast<bool>(!( Flags & 0x0200 )) );
-        oHeader.addValue( CADHeader::XEDIT, static_cast<bool>(!( Flags & 0x0400 )) );
-        oHeader.addValue( CADHeader::EXTNAMES, static_cast<bool>(Flags & 0x0800) );
-        oHeader.addValue( CADHeader::PSTYLEMODE, static_cast<bool>(Flags & 0x2000) );
-        oHeader.addValue( CADHeader::OLESTARTUP, static_cast<bool>(Flags & 0x4000) );
-    } else
+        oHeader.addValue( CADHeader::ENDCAPS, ( Flags & 0x0060 ) != 0 );
+        oHeader.addValue( CADHeader::JOINSTYLE, (Flags & 0x0180) != 0);
+        oHeader.addValue( CADHeader::LWDISPLAY, ( Flags & 0x0200 ) == 0);
+        oHeader.addValue( CADHeader::XEDIT, ( Flags & 0x0400 ) == 0);
+        oHeader.addValue( CADHeader::EXTNAMES, ( Flags & 0x0800 ) != 0 );
+        oHeader.addValue( CADHeader::PSTYLEMODE, ( Flags & 0x2000 ) != 0 );
+        oHeader.addValue( CADHeader::OLESTARTUP, ( Flags & 0x4000 ) != 0);
+    }
+    else
     {
         SkipBITLONG( pabyBuf, nBitOffsetFromStart );
     }
@@ -622,11 +625,12 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 
 
     int returnCode = CADErrorCodes::SUCCESS;
-    pFileIO->Read( pabyBuf, DWGSentinelLength );
-    if( memcmp( pabyBuf, DWGHeaderVariablesEnd, DWGSentinelLength ) )
+    pFileIO->Read( pabyBuf, DWGConstants::SentinelLength );
+    if( memcmp( pabyBuf, DWGConstants::HeaderVariablesEnd,
+                         DWGConstants::SentinelLength ) )
     {
         DebugMsg( "File is corrupted (HEADERVARS section ending sentinel "
-                          "doesnt match.)" );
+                          "doesn't match.)" );
 
         returnCode = CADErrorCodes::HEADER_SECTION_READ_FAILED;
     }
@@ -646,8 +650,9 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
 
         pFileIO->Seek( sectionLocatorRecords[1].dSeeker, CADFileIO::SeekOrigin::BEG );
 
-        pFileIO->Read( buffer, DWGSentinelLength );
-        if( memcmp( buffer, DWGDSClassesStart, DWGSentinelLength ) )
+        pFileIO->Read( buffer, DWGConstants::SentinelLength );
+        if( memcmp( buffer, DWGConstants::DSClassesStart,
+                            DWGConstants::SentinelLength ) )
         {
             std::cerr << "File is corrupted (wrong pointer to CLASSES section,"
                     "or CLASSES starting sentinel corrupted.)\n";
@@ -656,7 +661,8 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
         }
 
         pFileIO->Read( & dSectionSize, 4 );
-        DebugMsg( "Classes section length: %zd\n", dSectionSize );
+        DebugMsg( "Classes section length: %d\n",
+                  static_cast<int>(dSectionSize) );
 
         pabySectionContent = new char[dSectionSize + 4];
         pFileIO->Read( pabySectionContent, dSectionSize );
@@ -670,7 +676,7 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
             stClass.sCppClassName    = ReadTV( pabySectionContent, nBitOffsetFromStart );
             stClass.sDXFRecordName   = ReadTV( pabySectionContent, nBitOffsetFromStart );
             stClass.bWasZombie       = ReadBIT( pabySectionContent, nBitOffsetFromStart );
-            stClass.bIsEntity        = ReadBITSHORT( pabySectionContent, nBitOffsetFromStart ) == 0x1F2 ? true : false;
+            stClass.bIsEntity        = ReadBITSHORT( pabySectionContent, nBitOffsetFromStart ) == 0x1F2;
 
             oClasses.addClass( stClass );
         }
@@ -679,11 +685,12 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
 
         pFileIO->Read( buffer, 2 ); // CLASSES CRC!. TODO: add CRC computing & checking feature.
 
-        pFileIO->Read( buffer, DWGSentinelLength );
-        if( memcmp( buffer, DWGDSClassesEnd, DWGSentinelLength ) )
+        pFileIO->Read( buffer, DWGConstants::SentinelLength );
+        if( memcmp( buffer, DWGConstants::DSClassesEnd,
+                            DWGConstants::SentinelLength ) )
         {
             std::cerr << "File is corrupted (CLASSES section ending sentinel "
-                    "doesnt match.)\n";
+                    "doesn't match.)\n";
             return CADErrorCodes::CLASSES_SECTION_READ_FAILED;
         }
     }
@@ -694,11 +701,7 @@ int DWGFileR2000::CreateFileMap()
 {
     // Seems like ODA specification is completely awful. CRC is included in section size.
     // section size
-    char * pabySectionContent;
-    unsigned short dSectionSize;
-    size_t         nRecordsInSection;
-    size_t         nSection = 0;
-    size_t         nBitOffsetFromStart;
+    size_t nSection = 0;
 
     typedef pair<long, long> ObjHandleOffset;
     ObjHandleOffset          previousObjHandleOffset;
@@ -706,44 +709,48 @@ int DWGFileR2000::CreateFileMap()
 
     mapObjects.clear();
 
-    // seek to the begining of the objects map
+    // seek to the beginning of the objects map
     pFileIO->Seek( sectionLocatorRecords[2].dSeeker, CADFileIO::SeekOrigin::BEG );
 
     while( true )
     {
-        dSectionSize = 0;
+        unsigned short dSectionSize = 0;
 
         // read section size
-        pFileIO->Read( & dSectionSize, 2 );
+        pFileIO->Read( &dSectionSize, 2 );
         SwapEndianness( dSectionSize, sizeof( dSectionSize ) );
 
-        DebugMsg( "Object map section #%zd size: %hu\n", ++nSection, dSectionSize );
+        DebugMsg( "Object map section #%d size: %d\n",
+                  static_cast<int>(++nSection), dSectionSize );
 
         if( dSectionSize == 2 )
             break; // last section is empty.
 
-        pabySectionContent  = new char[dSectionSize + 4];
-        nBitOffsetFromStart = 0;
-        nRecordsInSection   = 0;
+        char * pabySectionContent  = new char[dSectionSize + 4];
+        size_t nBitOffsetFromStart = 0;
+        size_t nRecordsInSection   = 0;
 
         // read section data
         pFileIO->Read( pabySectionContent, dSectionSize );
+        unsigned int dSectionBitSize = (dSectionSize * 8) - 128; // 8 + 8*7
 
-        while( ( nBitOffsetFromStart / 8 ) < ( ( size_t ) dSectionSize - 2 ) )
+        while( nBitOffsetFromStart < dSectionBitSize )
         {
-            tmpOffset.first  = ReadUMCHAR( pabySectionContent, nBitOffsetFromStart );
-            tmpOffset.second = ReadMCHAR( pabySectionContent, nBitOffsetFromStart );
+            tmpOffset.first  = ReadUMCHAR( pabySectionContent, nBitOffsetFromStart ); // 8 + 8*8
+            tmpOffset.second = ReadMCHAR( pabySectionContent, nBitOffsetFromStart ); // 8 + 8*8
 
             if( 0 == nRecordsInSection )
             {
                 previousObjHandleOffset = tmpOffset;
-            } else
+            }
+            else
             {
                 previousObjHandleOffset.first += tmpOffset.first;
                 previousObjHandleOffset.second += tmpOffset.second;
             }
 #ifdef _DEBUG
-            assert( mapObjects.find( previousObjHandleOffset.first ) == mapObjects.end() );
+            assert( mapObjects.find( previousObjHandleOffset.first ) ==
+                                                                mapObjects.end() );
 #endif //_DEBUG
             mapObjects.insert( previousObjHandleOffset );
             ++nRecordsInSection;
@@ -762,8 +769,6 @@ int DWGFileR2000::CreateFileMap()
 
 CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
 {
-    CADObject * readed_object  = nullptr;
-
     char   pabyObjectSize[8];
     size_t nBitOffsetFromStart = 0;
     pFileIO->Seek( mapObjects[dHandle], CADFileIO::SeekOrigin::BEG );
@@ -772,14 +777,14 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
 
     // And read whole data chunk into memory for future parsing.
     // + nBitOffsetFromStart/8 + 2 is because dObjectSize doesn't cover CRC and itself.
-    size_t             nSectionSize = dObjectSize + nBitOffsetFromStart / 8 + 2;
-    unique_ptr<char[]> sectionContentPtr( new char[nSectionSize + 4] );
+    size_t nSectionSize = dObjectSize + nBitOffsetFromStart / 8 + 2;
+    unique_ptr<char[]> sectionContentPtr( new char[nSectionSize + 64] ); // 64 is extra buffer size
     char * pabySectionContent = sectionContentPtr.get();
     pFileIO->Seek( mapObjects[dHandle], CADFileIO::SeekOrigin::BEG );
     pFileIO->Read( pabySectionContent, nSectionSize );
 
     nBitOffsetFromStart = 0;
-    dObjectSize         = ReadMSHORT( pabySectionContent, nBitOffsetFromStart );
+    dObjectSize = ReadMSHORT( pabySectionContent, nBitOffsetFromStart );
     short dObjectType = ReadBITSHORT( pabySectionContent, nBitOffsetFromStart );
 
     if( dObjectType >= 500 )
@@ -789,13 +794,16 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
         if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbRasterImage" ) )
         {
             dObjectType = CADObject::IMAGE;
-        } else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbRasterImageDef" ) )
+        }
+        else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbRasterImageDef" ) )
         {
             dObjectType = CADObject::IMAGEDEF;
-        } else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbRasterImageDefReactor" ) )
+        }
+        else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbRasterImageDefReactor" ) )
         {
             dObjectType = CADObject::IMAGEDEFREACTOR;
-        } else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbWipeout" ) )
+        }
+        else if( !strcmp( cadClass.sCppClassName.c_str(), "AcDbWipeout" ) )
         {
             dObjectType = CADObject::WIPEOUT;
         }
@@ -841,7 +849,7 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
         stCommonEntityData.nInvisibility    = ReadBITSHORT( pabySectionContent, nBitOffsetFromStart );
         stCommonEntityData.nLineWeight      = ReadCHAR( pabySectionContent, nBitOffsetFromStart );
 
-        // Skip entitity-specific data, we dont need it if bHandlesOnly == true
+        // Skip entitity-specific data, we don't need it if bHandlesOnly == true
         if( bHandlesOnly == true )
         {
             return getEntity( dObjectType, dObjectSize, stCommonEntityData, pabySectionContent, nBitOffsetFromStart );
@@ -942,7 +950,8 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
                 return getEntity( dObjectType, dObjectSize, stCommonEntityData, pabySectionContent,
                                   nBitOffsetFromStart );
         }
-    } else
+    }
+    else
     {
         switch( dObjectType )
         {
@@ -978,7 +987,7 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
         }
     }
 
-    return readed_object;
+    return nullptr;
 }
 
 CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long dBlockRefHandle )
@@ -1123,8 +1132,8 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
 
         case CADObject::ATTDEF:
         {
-            CADAttdef       * attdef    = new CADAttdef();
-            CADAttdefObject * cadAttrib = static_cast<CADAttdefObject *>(
+            CADAttdef * attdef = new CADAttdef();
+            CADAttdefObject * cadAttrib = static_cast<CADAttdefObject*>(
                     readedObject.get() );
 
             attdef->setPosition( cadAttrib->vertInsetionPoint );
@@ -1256,8 +1265,9 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             CADImageObject * cadImage = static_cast<CADImageObject *>(
                     readedObject.get());
 
-            unique_ptr<CADImageDefObject> cadImageDef( static_cast<CADImageDefObject *>(
-                                                               GetObject( cadImage->hImageDef.getAsLong() ) ) );
+            unique_ptr<CADImageDefObject> cadImageDef(
+                static_cast<CADImageDefObject *>( GetObject(
+                    cadImage->hImageDef.getAsLong() ) ) );
 
 
             image->setClippingBoundaryType( cadImage->dClipBoundaryType );
@@ -1269,10 +1279,14 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             image->setImageSizeInPx( imageSizeInPx );
             CADVector pixelSizeInACADUnits( cadImageDef->dfXPixelSize, cadImageDef->dfYPixelSize );
             image->setPixelSizeInACADUnits( pixelSizeInACADUnits );
-            image->setResolutionUnits( ( CADImage::ResolutionUnit ) cadImageDef->dResUnits );
-            image->setOptions( cadImage->dDisplayProps & 0x08, cadImage->bClipping, cadImage->dBrightness,
+            image->setResolutionUnits(
+                static_cast<CADImage::ResolutionUnit>( cadImageDef->dResUnits ) );
+            bool bTransparency = (cadImage->dDisplayProps & 0x08) != 0;
+            image->setOptions( bTransparency,
+                               cadImage->bClipping,
+                               cadImage->dBrightness,
                                cadImage->dContrast );
-            for( const CADVector& clipPt :  cadImage->avertClippingPolygonVertexes )
+            for( const CADVector& clipPt : cadImage->avertClippingPolygonVertexes )
             {
                 image->addClippingPoint( clipPt );
             }
@@ -1409,12 +1423,12 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
     if( readedObject->stCed.nCMColor == 256 ) // BYLAYER CASE
     {
         CADLayer& oCurrentLayer = this->GetLayer( iLayerIndex );
-        poGeometry->setColor( CADACIColors[oCurrentLayer.getColor()] );
+        poGeometry->setColor( getCADACIColor( oCurrentLayer.getColor() ) );
     }
     else if( readedObject->stCed.nCMColor <= 255 &&
              readedObject->stCed.nCMColor >= 0 ) // Excessive check until BYBLOCK case will not be implemented
     {
-        poGeometry->setColor( CADACIColors[readedObject->stCed.nCMColor] );
+        poGeometry->setColor( getCADACIColor( readedObject->stCed.nCMColor ) );
     }
 
     // Applying EED
@@ -2054,7 +2068,8 @@ CADPolyline2DObject * DWGFileR2000::getPolyline2D( long dObjectSize, CADCommonED
     if( ReadBIT( pabyInput, nBitOffsetFromStart ) )
     {
         polyline->vectExtrusion = CADVector( 0.0f, 0.0f, 1.0f );
-    } else
+    }
+    else
     {
         CADVector vectExtrusion = ReadVector( pabyInput, nBitOffsetFromStart );
         polyline->vectExtrusion = vectExtrusion;
@@ -2158,16 +2173,18 @@ CADAttdefObject * DWGFileR2000::getAttributesDefn( long dObjectSize, CADCommonED
     attdef->stCed     = stCommonEntityData;
     attdef->DataFlags = ReadCHAR( pabyInput, nBitOffsetFromStart );
 
-    if( !( attdef->DataFlags & 0x01 ) )
+    if( ( attdef->DataFlags & 0x01 ) == 0 )
         attdef->dfElevation = ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
 
     CADVector vertInsetionPoint = ReadRAWVector( pabyInput, nBitOffsetFromStart );
     attdef->vertInsetionPoint = vertInsetionPoint;
 
-    if( !( attdef->DataFlags & 0x02 ) )
+    if( ( attdef->DataFlags & 0x02 ) == 0 )
     {
-        double    x = ReadBITDOUBLEWD( pabyInput, nBitOffsetFromStart, vertInsetionPoint.getX() );
-        double    y = ReadBITDOUBLEWD( pabyInput, nBitOffsetFromStart, vertInsetionPoint.getY() );
+        double x = ReadBITDOUBLEWD( pabyInput, nBitOffsetFromStart,
+            vertInsetionPoint.getX() );
+        double y = ReadBITDOUBLEWD( pabyInput, nBitOffsetFromStart,
+            vertInsetionPoint.getY() );
         CADVector vertAlignmentPoint( x, y );
         attdef->vertAlignmentPoint = vertAlignmentPoint;
     }
@@ -2175,28 +2192,29 @@ CADAttdefObject * DWGFileR2000::getAttributesDefn( long dObjectSize, CADCommonED
     if( ReadBIT( pabyInput, nBitOffsetFromStart ) )
     {
         attdef->vectExtrusion = CADVector( 0.0f, 0.0f, 1.0f );
-    } else
+    }
+    else
     {
         CADVector vectExtrusion = ReadVector( pabyInput, nBitOffsetFromStart );
         attdef->vectExtrusion = vectExtrusion;
     }
 
-    attdef->dfThickness = ReadBIT( pabyInput, nBitOffsetFromStart ) ? 0.0f : ReadBITDOUBLE( pabyInput,
-                                                                                            nBitOffsetFromStart );
+    attdef->dfThickness = ReadBIT( pabyInput, nBitOffsetFromStart ) ? 0.0f :
+                          ReadBITDOUBLE( pabyInput, nBitOffsetFromStart );
 
-    if( !( attdef->DataFlags & 0x04 ) )
+    if( ( attdef->DataFlags & 0x04 ) == 0 )
         attdef->dfObliqueAng  = ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
-    if( !( attdef->DataFlags & 0x08 ) )
+    if( ( attdef->DataFlags & 0x08 ) == 0 )
         attdef->dfRotationAng = ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
     attdef->dfHeight          = ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
-    if( !( attdef->DataFlags & 0x10 ) )
+    if( ( attdef->DataFlags & 0x10 ) == 0 )
         attdef->dfWidthFactor = ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
     attdef->sTextValue        = ReadTV( pabyInput, nBitOffsetFromStart );
-    if( !( attdef->DataFlags & 0x20 ) )
+    if( ( attdef->DataFlags & 0x20 ) == 0 )
         attdef->dGeneration   = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
-    if( !( attdef->DataFlags & 0x40 ) )
+    if( ( attdef->DataFlags & 0x40 ) == 0 )
         attdef->dHorizAlign   = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
-    if( !( attdef->DataFlags & 0x80 ) )
+    if( ( attdef->DataFlags & 0x80 ) == 0 )
         attdef->dVertAlign    = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
 
     attdef->sTag         = ReadTV( pabyInput, nBitOffsetFromStart );
@@ -2418,9 +2436,9 @@ CADSplineObject * DWGFileR2000::getSpline( long dObjectSize, CADCommonED stCommo
 CADEntityObject * DWGFileR2000::getEntity( int dObjectType, long dObjectSize, CADCommonED stCommonEntityData,
                                            const char * pabyInput, size_t& nBitOffsetFromStart )
 {
-    CADEntityObject * entity = new CADEntityObject();
+    CADEntityObject * entity = new CADEntityObject(
+                    static_cast<CADObject::ObjectType>(dObjectType) );
 
-    entity->setType( static_cast<CADObject::ObjectType>(dObjectType) );
     entity->setSize( dObjectSize );
     entity->stCed = stCommonEntityData;
 
@@ -2442,9 +2460,8 @@ CADEntityObject * DWGFileR2000::getEntity( int dObjectType, long dObjectSize, CA
 CADInsertObject * DWGFileR2000::getInsert( int dObjectType, long dObjectSize, CADCommonED stCommonEntityData,
                                            const char * pabyInput, size_t& nBitOffsetFromStart )
 {
-    CADInsertObject * insert = new CADInsertObject();
-
-    insert->setType( static_cast<CADObject::ObjectType>(dObjectType) );
+    CADInsertObject * insert = new CADInsertObject(
+                            static_cast<CADObject::ObjectType>(dObjectType) );
     insert->setSize( dObjectSize );
     insert->stCed = stCommonEntityData;
 
@@ -2500,7 +2517,7 @@ CADDictionaryObject * DWGFileR2000::getDictionary( long dObjectSize, const char 
 {
     /*
      * FIXME: ODA has a lot of mistypes in spec. for this objects,
-     * it doesnt work for now (error begins in handles stream).
+     * it doesn't work for now (error begins in handles stream).
      * Nonetheless, dictionary->sItemNames is 100% array,
      * not a single obj as pointer by their docs.
      */
@@ -2549,6 +2566,7 @@ CADDictionaryObject * DWGFileR2000::getDictionary( long dObjectSize, const char 
         DebugMsg( "Assertion failed at %d in %s\nSize difference: %d\n", __LINE__, __FILE__,
                   ( nBitOffsetFromStart / 8 - dObjectSize - 4 ) );
 #endif // _DEBUG
+
     return dictionary;
 }
 
@@ -2577,16 +2595,16 @@ CADLayerObject * DWGFileR2000::getLayerObject( long dObjectSize, const char * pa
 
     layer->nNumReactors = ReadBITLONG( pabyInput, nBitOffsetFromStart );
     layer->sLayerName   = ReadTV( pabyInput, nBitOffsetFromStart );
-    layer->b64Flag      = ReadBIT( pabyInput, nBitOffsetFromStart );
+    layer->b64Flag      = ReadBIT( pabyInput, nBitOffsetFromStart ) != 0;
     layer->dXRefIndex   = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
-    layer->bXDep        = ReadBIT( pabyInput, nBitOffsetFromStart );
+    layer->bXDep        = ReadBIT( pabyInput, nBitOffsetFromStart ) != 0;
 
     short dFlags = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
-    layer->bFrozen           = dFlags & 0x01;
-    layer->bOn               = dFlags & 0x02;
-    layer->bFrozenInNewVPORT = dFlags & 0x04;
-    layer->bLocked           = dFlags & 0x08;
-    layer->bPlottingFlag     = dFlags & 0x10;
+    layer->bFrozen           = (dFlags & 0x01) != 0;
+    layer->bOn               = (dFlags & 0x02) != 0;
+    layer->bFrozenInNewVPORT = (dFlags & 0x04) != 0;
+    layer->bLocked           = (dFlags & 0x08) != 0;
+    layer->bPlottingFlag     = (dFlags & 0x10) != 0;
     layer->dLineWeight       = dFlags & 0x03E0;
     layer->dCMColor          = ReadBITSHORT( pabyInput, nBitOffsetFromStart );
     layer->hLayerControl     = ReadHANDLE( pabyInput, nBitOffsetFromStart );
@@ -3617,15 +3635,18 @@ CADXRecordObject * DWGFileR2000::getXRecord( long dObjectSize, const char * paby
         {
             ReadCHAR( pabyInput, nBitOffsetFromStart );
         }
-    } else if( dIndicatorNumber == 70 )
+    }
+    else if( dIndicatorNumber == 70 )
     {
         ReadRAWSHORT( pabyInput, nBitOffsetFromStart );
-    } else if( dIndicatorNumber == 10 )
+    }
+    else if( dIndicatorNumber == 10 )
     {
         ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
         ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
         ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
-    } else if( dIndicatorNumber == 40 )
+    }
+    else if( dIndicatorNumber == 40 )
     {
         ReadRAWDOUBLE( pabyInput, nBitOffsetFromStart );
     }
@@ -3637,7 +3658,8 @@ CADXRecordObject * DWGFileR2000::getXRecord( long dObjectSize, const char * paby
 
     xrecord->hXDictionary = ReadHANDLE( pabyInput, nBitOffsetFromStart );
 
-    while( nBitOffsetFromStart / 8 < ( ( size_t ) dObjectSize + 4 ) )
+    size_t dObjectSizeBit = (dObjectSize + 4) * 8;
+    while( nBitOffsetFromStart < dObjectSizeBit )
     {
         xrecord->hObjIdHandles.push_back( ReadHANDLE( pabyInput, nBitOffsetFromStart ) );
     }
@@ -3645,9 +3667,9 @@ CADXRecordObject * DWGFileR2000::getXRecord( long dObjectSize, const char * paby
     nBitOffsetFromStart += 8 - ( nBitOffsetFromStart % 8 );
     xrecord->setCRC( ReadRAWSHORT( pabyInput, nBitOffsetFromStart ) );
 #ifdef _DEBUG
-    if( ( nBitOffsetFromStart / 8 ) != ( dObjectSize + 4 ) )
+    if( nBitOffsetFromStart != dObjectSizeBit )
         DebugMsg( "Assertion failed at %d in %s\nSize difference: %d\n", __LINE__, __FILE__,
-                  ( nBitOffsetFromStart / 8 - dObjectSize - 4 ) );
+                  ( nBitOffsetFromStart - dObjectSizeBit ) / 8 );
 #endif
 
     return xrecord;
@@ -3679,7 +3701,9 @@ void DWGFileR2000::fillCommonEntityHandleData( CADEntityObject * pEnt, const cha
         pEnt->stChed.hPlotStyle = ReadHANDLE( pabyInput, nBitOffsetFromStart );
 }
 
-DWGFileR2000::DWGFileR2000( CADFileIO * poFileIO ) : CADFile( poFileIO )
+DWGFileR2000::DWGFileR2000( CADFileIO * poFileIO ) :
+    CADFile( poFileIO ),
+    imageSeeker(0)
 {
     oHeader.addValue( CADHeader::OPENCADVER, CADVersions::DWG_R2000 );
 }
@@ -3737,26 +3761,36 @@ CADDictionary DWGFileR2000::GetNOD()
     CADDictionary stNOD;
 
     unique_ptr<CADDictionaryObject> spoNamedDictObj(
-            ( CADDictionaryObject * ) GetObject( oTables.GetTableHandle( CADTables::NamedObjectsDict ).getAsLong() ) );
+            static_cast<CADDictionaryObject*>( GetObject( oTables.GetTableHandle(
+                CADTables::NamedObjectsDict ).getAsLong() ) ) );
+    if( spoNamedDictObj == nullptr )
+        return stNOD;
 
     for( size_t i = 0; i < spoNamedDictObj->sItemNames.size(); ++i )
     {
-        unique_ptr<CADObject> spoDictRecord( GetObject( spoNamedDictObj->hItemHandles[i].getAsLong() ) );
+        unique_ptr<CADObject> spoDictRecord (
+                    GetObject( spoNamedDictObj->hItemHandles[i].getAsLong() ) );
 
-        if( spoDictRecord == nullptr ) continue; // skip unreaded objects
+        if( spoDictRecord == nullptr )
+            continue; // skip unreaded objects
 
-        if( spoDictRecord->getType() == CADObject::ObjectType::DICTIONARY )
+        if( spoDictRecord->getType() == CADObject::DICTIONARY )
         {
             // TODO: add implementation of DICTIONARY reading
-        } else if( spoDictRecord->getType() == CADObject::ObjectType::XRECORD )
+        }
+        else if( spoDictRecord->getType() == CADObject::XRECORD )
         {
-            CADXRecord       * cadxRecord       = new CADXRecord();
-            CADXRecordObject * cadxRecordObject = ( CADXRecordObject * ) spoDictRecord.get();
+            CADXRecord * cadxRecord = new CADXRecord();
+            CADXRecordObject * cadxRecordObject =
+                static_cast<CADXRecordObject*>(spoDictRecord.get());
 
-            string xRecordData( cadxRecordObject->abyDataBytes.begin(), cadxRecordObject->abyDataBytes.end() );
+            string xRecordData( cadxRecordObject->abyDataBytes.begin(),
+                                cadxRecordObject->abyDataBytes.end() );
             cadxRecord->setRecordData( xRecordData );
 
-            stNOD.addRecord( make_pair( spoNamedDictObj->sItemNames[i], ( CADDictionaryRecord * ) cadxRecord ) );
+			shared_ptr<CADDictionaryRecord> cadxRecordPtr(static_cast<CADDictionaryRecord*>(cadxRecord));
+
+            stNOD.addRecord( make_pair( spoNamedDictObj->sItemNames[i], cadxRecordPtr ) );
         }
     }
 

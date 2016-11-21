@@ -51,9 +51,9 @@ bool CADFileStreamIO::Eof() const
 
 bool CADFileStreamIO::Open( int mode )
 {
-    auto io_mode = std::ifstream::in; // as we use ifstream
+    auto io_mode = std::ifstream::in; // As we use ifstream
     if( mode & OpenMode::binary )
-        io_mode |= std::ifstream::binary;
+        io_mode = std::ifstream::binary; // In set by default
 
     if( mode & OpenMode::write )
         //io_mode |= std::ifstream::out;
@@ -84,6 +84,7 @@ int CADFileStreamIO::Seek( long offset, CADFileIO::SeekOrigin origin )
         case SeekOrigin::END:
             direction = std::ios_base::end;
             break;
+        default:
         case SeekOrigin::BEG:
             direction = std::ios_base::beg;
             break;

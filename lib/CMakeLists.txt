@@ -72,6 +72,7 @@ set(HHEADER_PRIV
 
 set(CSOURCES
     opencad.cpp
+    cadcolors.cpp
     cadfile.cpp
     cadfileio.cpp
     cadfilestreamio.cpp
