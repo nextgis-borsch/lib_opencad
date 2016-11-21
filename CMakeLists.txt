@@ -57,11 +57,7 @@ include(FindAnyProject)
 
 set(TARGET_LINK)
 add_subdirectory(lib)
-if(BUILD_SHARED_LIBS)
-    set(EXPORT_NAME ${PROJECT_NAME})
-else()
-    set(EXPORT_NAME ${PROJECT_NAME}static)
-endif()
+set(EXPORT_NAME ${PROJECT_NAME})
 export(TARGETS ${TARGET_LINK} FILE ${EXPORT_NAME}-exports.cmake)
 
 option(BUILD_APPS "Build console applications" ON)
