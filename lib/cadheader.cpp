@@ -202,7 +202,7 @@ long CADHandle::getAsLong() const
     return getAsLong(handleOrOffset);
 }
 
-long CADHandle::getAsLong(const std::vector<unsigned char>& handle) const
+long CADHandle::getAsLong(const std::vector<unsigned char>& handle)
 {
     long result = 0;
     if( handle.empty() )
@@ -214,7 +214,7 @@ long CADHandle::getAsLong(const std::vector<unsigned char>& handle) const
 
 bool CADHandle::isNull() const
 {
-    return handleOrOffset.size() == 0 ? true : false;
+    return handleOrOffset.empty() ? true : false;
 }
 
 //------------------------------------------------------------------------------
@@ -284,7 +284,7 @@ CADVariant::CADVariant( double x, double y, double z ) :
     dateTimeVal ( 0 )
 {
     char str_buff[256];
-    snprintf( str_buff, 255, "[%f,%f,%f]", x, y, z );
+    snprintf( str_buff, sizeof(str_buff), "[%.15g,%.15g,%.15g]", x, y, z );
     stringVal = str_buff;
 }
 
@@ -461,7 +461,7 @@ int CADHeader::addValue( short code, long julianday, long milliseconds )
     return addValue( code, CADVariant( fullSeconds ) );
 }
 
-int CADHeader::getGroupCode( short code ) const
+int CADHeader::getGroupCode( short code )
 {
     for( CADHeaderConstantDetail detail : CADHeaderConstantDetails )
     {
@@ -481,7 +481,7 @@ const CADVariant CADHeader::getValue( short code, const CADVariant& val ) const
         return val;
 }
 
-const char * CADHeader::getValueName( short code ) const
+const char * CADHeader::getValueName( short code )
 {
     for( CADHeaderConstantDetail detail : CADHeaderConstantDetails )
     {

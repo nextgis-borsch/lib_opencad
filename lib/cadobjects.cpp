@@ -71,12 +71,15 @@ bool CADVector::operator==( const CADVector& second )
                                                     fcmp( this->Z, second.Z ) );
 }
 
-CADVector CADVector::operator=( const CADVector& second )
+CADVector& CADVector::operator=( const CADVector& second )
 {
-    X     = second.X;
-    Y     = second.Y;
-    Z     = second.Z;
-    bHasZ = second.bHasZ;
+    if( &second != this )
+    {
+        X     = second.X;
+        Y     = second.Y;
+        Z     = second.Z;
+        bHasZ = second.bHasZ;
+    }
     return * this;
 }
 
@@ -719,7 +722,7 @@ short CADObject::getCRC() const
     return CRC;
 }
 
-void CADObject::setCRC( short value )
+void CADObject::setCRC( unsigned short value )
 {
     CRC = value;
 }
