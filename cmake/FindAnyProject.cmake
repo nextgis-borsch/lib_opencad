@@ -170,6 +170,13 @@ function(target_link_extlibraries name)
 
 endfunction()
 
+macro(any_project_var_to_parent_scope)
+    set(TARGET_LINK_LIB ${TARGET_LINK_LIB} PARENT_SCOPE)
+    set(DEPENDENCY_LIB ${DEPENDENCY_LIB} PARENT_SCOPE)
+    set(EXPORTS_PATHS ${EXPORTS_PATHS} PARENT_SCOPE)
+    set(LINK_SEARCH_PATHS ${LINK_SEARCH_PATHS} PARENT_SCOPE)
+endmacro()
+
 macro(write_ext_options IS_SHARED)
     set(OUTPUT_STR ${WITHOPT})
     if(NOT ${IS_SHARED})
