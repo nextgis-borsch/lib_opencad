@@ -3,7 +3,7 @@
 # Purpose:  CMake build scripts
 # Author:   Dmitry Baryshnikov, polimax@mail.ru
 ################################################################################
-# Copyright (C) 2015-2016, NextGIS <info@nextgis.com>
+# Copyright (C) 2015-2017, NextGIS <info@nextgis.com>
 # Copyright (C) 2015 Dmitry Baryshnikov
 #
 # This script is free software: you can redistribute it and/or modify
@@ -136,6 +136,49 @@ function(find_anyproject name)
         elseif(${name}_INCLUDE_DIR)
             include_directories(${${name}_INCLUDE_DIR})
         endif()
+
+        # Special case for Qt4
+        if(QT4_FOUND)
+            if (NOT TARGET Qt4::qmake)
+                add_executable(Qt4::qmake IMPORTED)
+                set_property(TARGET Qt4::qmake PROPERTY IMPORTED_LOCATION ${QT_QMAKE_EXECUTABLE})
+            endif()
+            if (NOT TARGET Qt4::moc)
+                add_executable(Qt4::moc IMPORTED)
+                set_property(TARGET Qt4::moc PROPERTY IMPORTED_LOCATION ${QT_MOC_EXECUTABLE})
+            endif()
+            if (NOT TARGET Qt4::rcc)
+                add_executable(Qt4::rcc IMPORTED)
+                set_property(TARGET Qt4::rcc PROPERTY IMPORTED_LOCATION ${QT_RCC_EXECUTABLE})
+            endif()
+            if (NOT TARGET Qt4::uic)
+                add_executable(Qt4::uic IMPORTED)
+                set_property(TARGET Qt4::uic PROPERTY IMPORTED_LOCATION ${QT_UIC_EXECUTABLE})
+            endif()
+            if (NOT TARGET Qt4::lrelease)
+                add_executable(Qt4::lrelease IMPORTED)
+                set_property(TARGET Qt4::lrelease PROPERTY IMPORTED_LOCATION ${QT_LRELEASE_EXECUTABLE})
+            endif()
+
+            mark_as_advanced(Qt4::qmake Qt4::moc Qt4::rcc Qt4::uic Qt4::lrelease)
+
+            foreach(QT4_NEED_COMPONENT ${find_anyproject_COMPONENTS})
+                string(TOUPPER ${QT4_NEED_COMPONENT} QT4_NEED_COMPONENT)
+                if(QT_${QT4_NEED_COMPONENT}_LIBRARY)
+                    set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} ${QT_${QT4_NEED_COMPONENT}_LIBRARY})
+                elseif(QT_${QT4_NEED_COMPONENT}_LIBRARY_RELEASE)
+                    set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} ${QT_${QT4_NEED_COMPONENT}_LIBRARY_RELEASE})
+                elseif(QT_${QT4_NEED_COMPONENT}_LIBRARY_DEBUG)
+                    set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} ${QT_${QT4_NEED_COMPONENT}_LIBRARY_DEBUG})
+                endif()
+                include_directories(${QT_${QT4_NEED_COMPONENT}_INCLUDE_DIR})
+                get_filename_component(PARENT_DIR ${QT_${QT4_NEED_COMPONENT}_INCLUDE_DIR} DIRECTORY)
+                include_directories(${PARENT_DIR})
+            endforeach()
+
+            include(Qt4Macros)
+        endif()
+
         if(${UPPER_NAME}_LIBRARIES)
             set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${${UPPER_NAME}_LIBRARIES} PARENT_SCOPE)
         elseif(${UPPER_NAME}_LIBRARY)
