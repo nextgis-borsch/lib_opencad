@@ -83,6 +83,8 @@ enable_testing()
 include(FindAnyProject)
 
 set(TARGET_LINK)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(lib)
 set(EXPORT_NAME ${PROJECT_NAME})
 export(TARGETS ${TARGET_LINK} FILE ${EXPORT_NAME}-exports.cmake)

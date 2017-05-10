@@ -47,11 +47,6 @@ if(OSX_FRAMEWORK)
     set_target_properties(cadinfo PROPERTIES INSTALL_RPATH "@executable_path/../../Library/Frameworks")
 endif()
 
-set_target_properties(cadinfo PROPERTIES
-    CXX_STANDARD 11
-    C_STANDARD 11
-)
-
 if(NOT SKIP_INSTALL_EXECUTABLES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS cadinfo
         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT applications
