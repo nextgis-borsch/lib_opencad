@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2017 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -31,24 +31,9 @@
 
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-include(util)
-
-check_version(OCAD_MAJOR_VERSION OCAD_MINOR_VERSION OCAD_REV_VERSION)
-set(VERSION ${OCAD_MAJOR_VERSION}.${OCAD_MINOR_VERSION}.${OCAD_REV_VERSION})
-set(SOVERSION 1)
-
-report_version(${PROJECT_NAME} ${VERSION})
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(OBJ_LIB)
-
-if(BUILD_SHARED_LIBS)
-    if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-        set( CMAKE_CXX_FLAGS "-fpic ${CMAKE_CXX_FLAGS}" )
-        set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )  
-    endif()
-endif()
 
 add_subdirectory(dwg)
 
@@ -84,37 +69,51 @@ set(CSOURCES
     cadlayer.cpp
     caddictionary.cpp)
 
-set(LIB_NAME)
+set(LIB_NAME ${PROJECT_NAME})
 if(BUILD_SHARED_LIBS)
-    set(LIB_TYPE SHARED)
-    set(LIB_NAME ${PROJECT_NAME})
+    add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
+    set_target_properties (${LIB_NAME} PROPERTIES
+        VERSION ${VERSION}
+        SOVERSION ${SOVERSION}
+        DEFINE_SYMBOL OCAD_EXPORTS
+    )
+    if(MSVC)
+        set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
+    endif()
+elseif(OSX_FRAMEWORK)
+    add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
+    set_target_properties(${LIB_NAME} PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION ${FRAMEWORK_VERSION}
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING ${VERSION}
+      MACOSX_FRAMEWORK_BUNDLE_VERSION ${VERSION}
+      MACOSX_FRAMEWORK_IDENTIFIER org.opencad.opencad
+      XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+      PUBLIC_HEADER "${HHEADERS}"
+      VERSION ${VERSION}
+      SOVERSION ${SOVERSION}
+      )
 else()
-    set(LIB_TYPE STATIC)
-    set(LIB_NAME ${PROJECT_NAME}static)
+    add_library(${LIB_NAME} STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
+    if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+        set( CMAKE_CXX_FLAGS "-fpic ${CMAKE_CXX_FLAGS}" )
+        set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )
+    endif()
 endif()
 
-add_library(${LIB_NAME} ${LIB_TYPE} ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
 set(INSTALL_TARGETS ${LIB_NAME})
 if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
-    add_library(${LIB_NAME}static STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})  
+    add_library(${LIB_NAME}static STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
     set(INSTALL_TARGETS ${INSTALL_TARGETS} ${LIB_NAME}static)
+    if(WIN32)
+        set_target_properties(${LIB_NAME}static PROPERTIES OUTPUT_NAME ${LIB_NAME}_i)
+    else()
+        set_target_properties(${LIB_NAME}static PROPERTIES OUTPUT_NAME ${LIB_NAME})
+    endif()
+    set_target_properties(${LIB_NAME}static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 endif()
 
 set(TARGET_LINK ${TARGET_LINK} ${LIB_NAME} PARENT_SCOPE)
-
-if(BUILD_SHARED_LIBS)
-    if(WIN32)
-        set (LIB_VERSION ${OCAD_MAJOR_VERSION})
-        if(MSVC)
-            set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
-        endif()
-    else ()
-      set (LIB_VERSION ${VERSION})
-    endif()
-    set_target_properties (${LIB_NAME} PROPERTIES VERSION ${LIB_VERSION})
-    set_target_properties (${LIB_NAME} PROPERTIES SOVERSION ${SOVERSION})
-    set_target_properties (${LIB_NAME} PROPERTIES DEFINE_SYMBOL OCAD_EXPORTS)
-endif()
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS ${INSTALL_TARGETS}
@@ -122,6 +121,7 @@ if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
         LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
+        FRAMEWORK DESTINATION ${INSTALL_LIB_DIR}
     )
 endif()
 

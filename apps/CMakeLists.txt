@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2017 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 #*******************************************************************************
- 
+
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 project(apps)
@@ -43,7 +43,11 @@ add_executable(cadinfo ${CSOURCES})
 
 target_link_libraries(cadinfo ${TARGET_LINK})
 
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+if(OSX_FRAMEWORK)
+    set_target_properties(cadinfo PROPERTIES INSTALL_RPATH "@executable_path/../../Library/Frameworks")
+endif()
+
+if(NOT SKIP_INSTALL_EXECUTABLES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS cadinfo
         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT applications
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT applications
