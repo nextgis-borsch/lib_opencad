@@ -69,6 +69,11 @@ set(CSOURCES
     cadlayer.cpp
     caddictionary.cpp)
 
+if(UNIX)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
+
 set(LIB_NAME ${PROJECT_NAME})
 if(BUILD_SHARED_LIBS)
     add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
@@ -95,10 +100,6 @@ elseif(OSX_FRAMEWORK)
       )
 else()
     add_library(${LIB_NAME} STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
-    if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-        set( CMAKE_CXX_FLAGS "-fpic ${CMAKE_CXX_FLAGS}" )
-        set( CMAKE_C_FLAGS   "-fpic ${CMAKE_C_FLAGS}" )
-    endif()
 endif()
 
 set(INSTALL_TARGETS ${LIB_NAME})
