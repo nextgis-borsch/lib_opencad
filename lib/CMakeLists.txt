@@ -112,8 +112,7 @@ if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
     else()
         set_target_properties(${LIB_NAME}static PROPERTIES OUTPUT_NAME ${LIB_NAME})
     endif()
-    set_target_properties(${LIB_NAME}static PROPERTIES
-    )
+    set_target_properties(${LIB_NAME}static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 endif()
 
 set(TARGET_LINK ${TARGET_LINK} ${LIB_NAME} PARENT_SCOPE)
