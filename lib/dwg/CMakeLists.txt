@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2017 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -41,8 +41,12 @@ set(CSOURCES
     r2000.cpp
 )
 
-add_library(${PROJECT_NAME} OBJECT ${CSOURCES} ${HHEADERS})
+add_library(${PROJECT_NAME}_R2000 OBJECT ${CSOURCES} ${HHEADERS})
 
-set(OBJ_LIB ${OBJ_LIB} $<TARGET_OBJECTS:${PROJECT_NAME}> PARENT_SCOPE)
+set_target_properties(${PROJECT_NAME}_R2000 PROPERTIES
+    CXX_STANDARD 11
+    C_STANDARD 11
+)
 
 
+set(OBJ_LIB ${OBJ_LIB} $<TARGET_OBJECTS:${PROJECT_NAME}_R2000> PARENT_SCOPE)
