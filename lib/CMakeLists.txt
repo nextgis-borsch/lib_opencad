@@ -33,6 +33,12 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+
+if(UNIX)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
+
 set(OBJ_LIB)
 
 add_subdirectory(dwg)
@@ -69,11 +75,6 @@ set(CSOURCES
     cadlayer.cpp
     caddictionary.cpp)
 
-if(UNIX)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-endif()
-
 set(LIB_NAME ${PROJECT_NAME})
 if(BUILD_SHARED_LIBS)
     add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
@@ -102,6 +103,12 @@ else()
     add_library(${LIB_NAME} STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
 endif()
 
+set_target_properties(${LIB_NAME} PROPERTIES
+    CXX_STANDARD 11
+    C_STANDARD 11
+)
+
+
 set(INSTALL_TARGETS ${LIB_NAME})
 if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
     add_library(${LIB_NAME}static STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
@@ -111,7 +118,11 @@ if(BUILD_SHARED_LIBS AND BUILD_STATIC_LIBS)
     else()
         set_target_properties(${LIB_NAME}static PROPERTIES OUTPUT_NAME ${LIB_NAME})
     endif()
-    set_target_properties(${LIB_NAME}static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+    set_target_properties(${LIB_NAME}static PROPERTIES
+        CLEAN_DIRECT_OUTPUT 1
+        CXX_STANDARD 11
+        C_STANDARD 11
+    )
 endif()
 
 set(TARGET_LINK ${TARGET_LINK} ${LIB_NAME} PARENT_SCOPE)
