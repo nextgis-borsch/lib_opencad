@@ -99,8 +99,6 @@ endif()
 
 set(TARGET_LINK)
 add_subdirectory(lib)
-set(EXPORT_NAME ${PROJECT_NAME})
-export(TARGETS ${TARGET_LINK} FILE ${EXPORT_NAME}-exports.cmake)
 
 option(BUILD_APPS "Build console applications" ON)
 if(BUILD_APPS)
