@@ -31,6 +31,8 @@
 #ifndef CADFILEIO_H
 #define CADFILEIO_H
 
+#include "opencad.h"
+
 #include <cstddef>
 #include <string>
 
