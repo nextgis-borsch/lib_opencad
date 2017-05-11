@@ -80,7 +80,7 @@ typedef std::vector<CADEed>    CADEedArray;
 /**
  * @brief The base CAD object class
  */
-class CADObject
+class OCAD_EXTERN CADObject
 {
 public:
     enum ObjectType
