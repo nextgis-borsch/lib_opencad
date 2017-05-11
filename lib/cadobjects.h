@@ -37,7 +37,7 @@
 /*
  * @brief Class which basically implements implements 3D vertex
  */
-class CADVector
+class OCAD_EXTERN CADVector
 {
 public:
     CADVector();

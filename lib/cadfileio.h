@@ -38,7 +38,7 @@
  * @brief The CADFileIO class provides in/out file operations as read, write,
  * seek, etc. This is abstract class.
  */
-class CADFileIO
+class OCAD_EXTERN CADFileIO
 {
 public:
     enum class SeekOrigin
