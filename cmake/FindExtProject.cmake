@@ -386,13 +386,16 @@ function(find_extproject name)
             # check version
             if(find_extproject_EXACT)
                 set(BRANCH_NAME FALSE)
+                execute_process(COMMAND ${GIT_EXECUTABLE} fetch --tags
+                    WORKING_DIRECTORY  ${EXT_SOURCE_DIR})
                 execute_process(COMMAND ${GIT_EXECUTABLE} tag -l "v*"
                     OUTPUT_VARIABLE EP_TAGS
                     WORKING_DIRECTORY  ${EXT_SOURCE_DIR})
-                string(REPLACE "\n" " " EP_TAGS ${EP_TAGS})
+                string(REPLACE "\n" ";" EP_TAGS ${EP_TAGS})
                 foreach(EP_TAG ${EP_TAGS})
                     string(SUBSTRING ${EP_TAG} 1 -1 EP_TAG)
-                    if(find_extproject_VERSION VERSION_EQUAL EP_TAG)
+                    message(STATUS "Test tag ${EP_TAG}")
+                    if(find_extproject_VERSION VERSION_EQUAL ${EP_TAG})
                         set(BRANCH_NAME "tags/v${EP_TAG}")
                     endif()
                 endforeach()
