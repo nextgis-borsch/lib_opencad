@@ -37,7 +37,7 @@
 /*
  * @brief Base-class for XRecord and Dictionary.
  */
-class OCAD_EXTERN CADDictionaryRecord
+class CADDictionaryRecord
 {
 public:
     CADDictionaryRecord();
