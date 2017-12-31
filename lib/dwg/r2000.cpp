@@ -39,7 +39,7 @@
 #include <memory>
 #include <string>
 
-#if (defined(__sun__) || defined(__FreeBSD__)) && __GNUC__ == 4 && __GNUC_MINOR__ == 8
+#if ((defined(__sun__) || defined(__FreeBSD__)) && __GNUC__ == 4 && __GNUC_MINOR__ == 8) || defined(__ANDROID__)
 // gcc 4.8 on Solaris 11.3 or FreeBSD 11 doesn't have std::string
 #include <sstream>
 template <typename T> std::string to_string(T val)
@@ -75,7 +75,7 @@ using namespace std;
 int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 {
     char bufferPre[255];
-    size_t dHeaderVarsSectionLength = 0;
+    unsigned dHeaderVarsSectionLength = 0;
     const size_t dSizeOfSectionSize = 4;
 
     pFileIO->Seek( sectionLocatorRecords[0].dSeeker, CADFileIO::SeekOrigin::BEG );
@@ -99,7 +99,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     readSize = pFileIO->Read( &dHeaderVarsSectionLength, dSizeOfSectionSize );
         DebugMsg( "Header variables section length: %d\n",
                   static_cast<int>(dHeaderVarsSectionLength) );
-    if(dHeaderVarsSectionLength > 65536) //NOTE: maybe header section may be bigger
+    if(readSize != dSizeOfSectionSize || dHeaderVarsSectionLength > 65536) //NOTE: maybe header section may be bigger
     {
         DebugMsg( "File is corrupted (HEADER_VARS section length too big)" );
         return CADErrorCodes::HEADER_SECTION_READ_FAILED;
@@ -110,8 +110,9 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     readSize = pFileIO->Read(buffer.GetRawBuffer(), dHeaderVarsSectionLength + 2 );
     if(readSize != dHeaderVarsSectionLength + 2)
     {
-        DebugMsg( "Failed to read %ld byte of file. Read only %ld",
-                  dHeaderVarsSectionLength + 2, readSize );
+        DebugMsg( "Failed to read %d byte of file. Read only %d",
+                  static_cast<int>(dHeaderVarsSectionLength + 2),
+                  static_cast<int>(readSize) );
         return CADErrorCodes::HEADER_SECTION_READ_FAILED;
     }
 
@@ -708,13 +709,14 @@ int DWGFileR2000::ReadClasses( enum OpenOptions eOptions )
         size_t readSize = pFileIO->Read( buffer.GetRawBuffer(), dSectionSize + 2 );
         if(readSize != dSectionSize + 2)
         {
-            DebugMsg( "Failed to read %ld byte of file. Read only %ld",
-                      dSectionSize + 2, readSize );
+            DebugMsg( "Failed to read %d byte of file. Read only %d",
+                      static_cast<int>(dSectionSize + 2),
+                      static_cast<int>(readSize) );
             return CADErrorCodes::CLASSES_SECTION_READ_FAILED;
         }
 
         size_t dSectionBitSize = (dSectionSize + dSizeOfSectionSize) * 8;
-        while( buffer.PostionBit() < dSectionBitSize - 8)
+        while( buffer.PositionBit() < dSectionBitSize - 8)
         {
             CADClass stClass;
             stClass.dClassNum        = buffer.ReadBITSHORT();
@@ -788,13 +790,14 @@ int DWGFileR2000::CreateFileMap()
         size_t readSize = pFileIO->Read( buffer.GetRawBuffer(), dSectionSize );
         if(readSize != dSectionSize)
         {
-            DebugMsg( "Failed to read %d byte of file. Read only %ld",
-                      dSectionSize, readSize );
+            DebugMsg( "Failed to read %d byte of file. Read only %d",
+                      static_cast<int>(dSectionSize),
+                      static_cast<int>(readSize) );
             return CADErrorCodes::OBJECTS_SECTION_READ_FAILED;
         }
         unsigned int dSectionBitSize = dSectionSize * 8;
 
-        while( buffer.PostionBit() < dSectionBitSize )
+        while( buffer.PositionBit() < dSectionBitSize )
         {
             tmpOffset.first  = buffer.ReadUMCHAR(); // 8 + 8*8
             tmpOffset.second = buffer.ReadMCHAR(); // 8 + 8*8
@@ -805,8 +808,12 @@ int DWGFileR2000::CreateFileMap()
             }
             else
             {
-                previousObjHandleOffset.first += tmpOffset.first;
-                previousObjHandleOffset.second += tmpOffset.second;
+                if(std::numeric_limits<long>::max() - tmpOffset.first >
+                        previousObjHandleOffset.first)
+                    previousObjHandleOffset.first += tmpOffset.first;
+                if(std::numeric_limits<long>::max() - tmpOffset.second >
+                        previousObjHandleOffset.second)
+                    previousObjHandleOffset.second += tmpOffset.second;
             }
 #ifdef _DEBUG
             assert( mapObjects.find( previousObjHandleOffset.first ) ==
@@ -843,7 +850,7 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
 
     // And read whole data chunk into memory for future parsing.
     // + nBitOffsetFromStart/8 + 2 is because dObjectSize doesn't cover CRC and itself.
-    dObjectSize += static_cast<unsigned int>(buffer.PostionBit() / 8 + 2);
+    dObjectSize += static_cast<unsigned int>(buffer.PositionBit() / 8 + 2);
 
     CADBuffer objectBuffer(dObjectSize + 64);
 
@@ -852,8 +859,9 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
                                      static_cast<size_t>(dObjectSize) );
     if(readSize != static_cast<size_t>(dObjectSize))
     {
-        DebugMsg( "Failed to read %ld byte of file. Read only %ld",
-                  static_cast<size_t>(dObjectSize), readSize );
+        DebugMsg( "Failed to read %d byte of file. Read only %d",
+                  static_cast<int>(dObjectSize),
+                  static_cast<int>(readSize) );
         return nullptr;
     }
 
@@ -1067,7 +1075,7 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
 CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long dBlockRefHandle )
 {
     CADGeometry * poGeometry = nullptr;
-    unique_ptr<CADEntityObject> readedObject( static_cast<CADEntityObject *>(GetObject( dHandle )) );
+    unique_ptr<CADEntityObject> readedObject( dynamic_cast<CADEntityObject *>(GetObject( dHandle )) );
 
     if( nullptr == readedObject )
         return nullptr;
@@ -1118,7 +1126,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             long                          currentVertexH = cadPolyline3D->hVertexes[0].getAsLong();
             while( currentVertexH != 0 )
             {
-                vertex.reset( static_cast<CADVertex3DObject *>(
+                vertex.reset( dynamic_cast<CADVertex3DObject *>(
                                       GetObject( currentVertexH )) );
 
                 if( vertex == nullptr )
@@ -1137,7 +1145,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
                 // Last vertex is reached. read it and break reading.
                 if( currentVertexH == cadPolyline3D->hVertexes[1].getAsLong() )
                 {
-                    vertex.reset( static_cast<CADVertex3DObject *>(
+                    vertex.reset( dynamic_cast<CADVertex3DObject *>(
                                           GetObject( currentVertexH )) );
                     polyline->addVertex( vertex->vertPosition );
                     break;
@@ -1340,32 +1348,34 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
                     readedObject.get());
 
             unique_ptr<CADImageDefObject> cadImageDef(
-                static_cast<CADImageDefObject *>( GetObject(
+                dynamic_cast<CADImageDefObject *>( GetObject(
                     cadImage->hImageDef.getAsLong() ) ) );
 
-
-            image->setClippingBoundaryType( cadImage->dClipBoundaryType );
-            image->setFilePath( cadImageDef->sFilePath );
-            image->setVertInsertionPoint( cadImage->vertInsertion );
-            CADVector imageSize( cadImage->dfSizeX, cadImage->dfSizeY );
-            image->setImageSize( imageSize );
-            CADVector imageSizeInPx( cadImageDef->dfXImageSizeInPx, cadImageDef->dfYImageSizeInPx );
-            image->setImageSizeInPx( imageSizeInPx );
-            CADVector pixelSizeInACADUnits( cadImageDef->dfXPixelSize, cadImageDef->dfYPixelSize );
-            image->setPixelSizeInACADUnits( pixelSizeInACADUnits );
-            image->setResolutionUnits(
-                static_cast<CADImage::ResolutionUnit>( cadImageDef->dResUnits ) );
-            bool bTransparency = (cadImage->dDisplayProps & 0x08) != 0;
-            image->setOptions( bTransparency,
-                               cadImage->bClipping,
-                               cadImage->dBrightness,
-                               cadImage->dContrast );
-            for( const CADVector& clipPt : cadImage->avertClippingPolygonVertexes )
+            if(cadImageDef)
             {
-                image->addClippingPoint( clipPt );
-            }
+                image->setClippingBoundaryType( cadImage->dClipBoundaryType );
+                image->setFilePath( cadImageDef->sFilePath );
+                image->setVertInsertionPoint( cadImage->vertInsertion );
+                CADVector imageSize( cadImage->dfSizeX, cadImage->dfSizeY );
+                image->setImageSize( imageSize );
+                CADVector imageSizeInPx( cadImageDef->dfXImageSizeInPx, cadImageDef->dfYImageSizeInPx );
+                image->setImageSizeInPx( imageSizeInPx );
+                CADVector pixelSizeInACADUnits( cadImageDef->dfXPixelSize, cadImageDef->dfYPixelSize );
+                image->setPixelSizeInACADUnits( pixelSizeInACADUnits );
+                image->setResolutionUnits(
+                    static_cast<CADImage::ResolutionUnit>( cadImageDef->dResUnits ) );
+                bool bTransparency = (cadImage->dDisplayProps & 0x08) != 0;
+                image->setOptions( bTransparency,
+                                   cadImage->bClipping,
+                                   cadImage->dBrightness,
+                                   cadImage->dContrast );
+                for( const CADVector& clipPt : cadImage->avertClippingPolygonVertexes )
+                {
+                    image->addClippingPoint( clipPt );
+                }
 
-            poGeometry = image;
+                poGeometry = image;
+            }
             break;
         }
 
@@ -1418,7 +1428,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             auto                             dLastEntHandle    = cadpolyPface->hVertexes[1].getAsLong();
             while( true )
             {
-                vertex.reset( static_cast<CADVertexPFaceObject *>(
+                vertex.reset( dynamic_cast<CADVertexPFaceObject *>(
                                       GetObject( dCurrentEntHandle )) );
                 /* TODO: this check is excessive, but if something goes wrong way -
              * some part of geometries will be parsed. */
@@ -1443,9 +1453,12 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
 
                 if( dCurrentEntHandle == dLastEntHandle )
                 {
-                    vertex.reset( static_cast<CADVertexPFaceObject *>(
+                    vertex.reset( dynamic_cast<CADVertexPFaceObject *>(
                                           GetObject( dCurrentEntHandle )) );
-                    polyline->addVertex( vertex->vertPosition );
+                    if(vertex)
+                    {
+                        polyline->addVertex( vertex->vertPosition );
+                    }
                     break;
                 }
             }
@@ -1622,9 +1635,9 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
     if( dBlockRefHandle != 0 )
     {
         vector<CADAttrib>           blockRefAttributes;
-        unique_ptr<CADInsertObject> spoBlockRef( static_cast<CADInsertObject *>( GetObject( dBlockRefHandle ) ) );
+        unique_ptr<CADInsertObject> spoBlockRef( dynamic_cast<CADInsertObject *>( GetObject( dBlockRefHandle ) ) );
 
-        if( !spoBlockRef->hAttribs.empty() )
+        if( spoBlockRef && !spoBlockRef->hAttribs.empty() )
         {
             long dCurrentEntHandle = spoBlockRef->hAttribs[0].getAsLong();
             long dLastEntHandle    = spoBlockRef->hAttribs[0].getAsLong();
@@ -1632,7 +1645,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             while( spoBlockRef->bHasAttribs )
             {
                 // FIXME: memory leak, somewhere in CAD* destructor is a bug
-                CADEntityObject * attDefObj = static_cast<CADEntityObject *>(
+                CADEntityObject * attDefObj = dynamic_cast<CADEntityObject *>(
                         GetObject( dCurrentEntHandle, true ) );
 
                 if( dCurrentEntHandle == dLastEntHandle )
@@ -3524,7 +3537,7 @@ CADXRecordObject * DWGFileR2000::getXRecord(unsigned int dObjectSize, CADBuffer 
     xrecord->hXDictionary = buffer.ReadHANDLE();
 
     size_t dObjectSizeBit = (dObjectSize + 4) * 8;
-    while( buffer.PostionBit() < dObjectSizeBit )
+    while( buffer.PositionBit() < dObjectSizeBit )
     {
         xrecord->hObjIdHandles.push_back( buffer.ReadHANDLE() );
     }
@@ -3611,7 +3624,7 @@ int DWGFileR2000::ReadSectionLocators()
         DebugMsg( "  Record #%d : %d %d\n", sectionLocatorRecords[i].byRecordNumber, sectionLocatorRecords[i].dSeeker,
                   sectionLocatorRecords[i].dSize );
     }
-    if( sectionLocatorRecords.empty() )
+    if( sectionLocatorRecords.size() < 3 )
         return CADErrorCodes::HEADER_SECTION_READ_FAILED;
 
     return CADErrorCodes::SUCCESS;
@@ -3622,7 +3635,7 @@ CADDictionary DWGFileR2000::GetNOD()
     CADDictionary stNOD;
 
     unique_ptr<CADDictionaryObject> spoNamedDictObj(
-            static_cast<CADDictionaryObject*>( GetObject( oTables.GetTableHandle(
+            dynamic_cast<CADDictionaryObject*>( GetObject( oTables.GetTableHandle(
                 CADTables::NamedObjectsDict ).getAsLong() ) ) );
     if( spoNamedDictObj == nullptr )
         return stNOD;

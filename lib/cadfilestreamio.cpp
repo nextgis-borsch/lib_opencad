@@ -95,7 +95,7 @@ int CADFileStreamIO::Seek( long offset, CADFileIO::SeekOrigin origin )
 
 long int CADFileStreamIO::Tell()
 {
-    return m_oFileStream.tellg();
+    return static_cast<long>(m_oFileStream.tellg());
 }
 
 size_t CADFileStreamIO::Read( void * ptr, size_t size )
