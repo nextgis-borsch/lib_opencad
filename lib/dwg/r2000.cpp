@@ -2469,7 +2469,8 @@ CADSplineObject * DWGFileR2000::getSpline(unsigned int dObjectSize,
             return nullptr;
         }
         spline->averFitPoints.reserve( static_cast<size_t>(spline->nNumFitPts) );
-    } else if( spline->dScenario == 1 )
+    }
+    else if( spline->dScenario == 1 )
     {
         spline->bRational = buffer.ReadBIT();
         spline->bClosed   = buffer.ReadBIT();
@@ -2504,6 +2505,7 @@ CADSplineObject * DWGFileR2000::getSpline(unsigned int dObjectSize,
 #endif
     for( long i = 0; i < spline->nNumKnots; ++i )
         spline->adfKnots.push_back( buffer.ReadBITDOUBLE() );
+
     for( long i = 0; i < spline->nNumCtrlPts; ++i )
     {
         CADVector vertex = buffer.ReadVector();
@@ -2511,6 +2513,7 @@ CADSplineObject * DWGFileR2000::getSpline(unsigned int dObjectSize,
         if( spline->bWeight )
             spline->adfCtrlPointsWeight.push_back( buffer.ReadBITDOUBLE() );
     }
+
     for( long i = 0; i < spline->nNumFitPts; ++i )
     {
         CADVector vertex = buffer.ReadVector();
@@ -2565,12 +2568,14 @@ CADInsertObject * DWGFileR2000::getInsert(int dObjectType,
         val41 = buffer.ReadRAWDOUBLE();
         val42 = buffer.ReadBITDOUBLEWD( val41 );
         val43 = buffer.ReadBITDOUBLEWD( val41 );
-    } else if( dataFlags == 1 )
+    }
+    else if( dataFlags == 1 )
     {
         val41 = 1.0;
         val42 = buffer.ReadBITDOUBLEWD( val41 );
         val43 = buffer.ReadBITDOUBLEWD( val41 );
-    } else if( dataFlags == 2 )
+    }
+    else if( dataFlags == 2 )
     {
         val41 = buffer.ReadRAWDOUBLE();
         val42 = val41;
@@ -2608,34 +2613,12 @@ CADDictionaryObject * DWGFileR2000::getDictionary(unsigned int dObjectSize,
      */
     CADDictionaryObject * dictionary = new CADDictionaryObject();
 
-    dictionary->setSize( dObjectSize );
-    dictionary->nObjectSizeInBits = buffer.ReadRAWLONG();
-    dictionary->hObjectHandle     = buffer.ReadHANDLE();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back(buffer.ReadCHAR() );
-            }
-        }
-
-        dictionary->aEED.push_back( dwgEed );
-    }
-
-    dictionary->nNumReactors   = buffer.ReadBITSHORT();
-    if(dictionary->nNumReactors < 0)
+    if(!readBasicData(dictionary, dObjectSize, buffer))
     {
         delete dictionary;
         return nullptr;
     }
+
     dictionary->nNumItems      = buffer.ReadBITLONG();
     if(dictionary->nNumItems < 0)
     {
@@ -2667,34 +2650,12 @@ CADLayerObject * DWGFileR2000::getLayerObject(unsigned int dObjectSize,
 {
     CADLayerObject * layer = new CADLayerObject();
 
-    layer->setSize( dObjectSize );
-    layer->nObjectSizeInBits = buffer.ReadRAWLONG();
-    layer->hObjectHandle     = buffer.ReadHANDLE();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        layer->aEED.push_back( dwgEed );
-    }
-
-    layer->nNumReactors = buffer.ReadBITLONG();
-    if(layer->nNumReactors < 0)
+    if(!readBasicData(layer, dObjectSize, buffer))
     {
         delete layer;
         return nullptr;
     }
+
     layer->sLayerName   = buffer.ReadTV();
     layer->b64Flag      = buffer.ReadBIT() != 0;
     layer->dXRefIndex   = buffer.ReadBITSHORT();
@@ -2734,30 +2695,12 @@ CADLayerControlObject * DWGFileR2000::getLayerControl(unsigned int dObjectSize,
 {
     CADLayerControlObject * layerControl = new CADLayerControlObject();
 
-    layerControl->setSize( dObjectSize );
-    layerControl->nObjectSizeInBits = buffer.ReadRAWLONG();
-    layerControl->hObjectHandle     = buffer.ReadHANDLE();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
+    if(!readBasicData(layerControl, dObjectSize, buffer))
     {
-
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        layerControl->aEED.push_back( dwgEed );
+        delete layerControl;
+        return nullptr;
     }
 
-    layerControl->nNumReactors = buffer.ReadBITLONG();
     layerControl->nNumEntries  = buffer.ReadBITLONG();
     if(layerControl->nNumEntries < 0)
     {
@@ -2779,29 +2722,12 @@ CADBlockControlObject * DWGFileR2000::getBlockControl(unsigned int dObjectSize,
 {
     CADBlockControlObject * blockControl = new CADBlockControlObject();
 
-    blockControl->setSize( dObjectSize );
-    blockControl->nObjectSizeInBits = buffer.ReadRAWLONG();
-    blockControl->hObjectHandle     = buffer.ReadHANDLE();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
+    if(!readBasicData(blockControl, dObjectSize, buffer))
     {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        blockControl->aEED.push_back( dwgEed );
+        delete blockControl;
+        return nullptr;
     }
 
-    blockControl->nNumReactors = buffer.ReadBITLONG();
     blockControl->nNumEntries  = buffer.ReadBITLONG();
     if(blockControl->nNumEntries < 0)
     {
@@ -2827,34 +2753,12 @@ CADBlockHeaderObject * DWGFileR2000::getBlockHeader(unsigned int dObjectSize,
 {
     CADBlockHeaderObject * blockHeader = new CADBlockHeaderObject();
 
-    blockHeader->setSize( dObjectSize );
-    blockHeader->nObjectSizeInBits = buffer.ReadRAWLONG();
-    blockHeader->hObjectHandle     = buffer.ReadHANDLE();
-
-    short  dEEDSize;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        blockHeader->aEED.push_back( dwgEed );
-    }
-
-    blockHeader->nNumReactors  = buffer.ReadBITLONG();
-    if(blockHeader->nNumReactors < 0)
+    if(!readBasicData(blockHeader, dObjectSize, buffer))
     {
         delete blockHeader;
         return nullptr;
     }
+
     blockHeader->sEntryName    = buffer.ReadTV();
     blockHeader->b64Flag       = buffer.ReadBIT();
     blockHeader->dXRefIndex    = buffer.ReadBITSHORT();
@@ -2911,29 +2815,13 @@ CADLineTypeControlObject * DWGFileR2000::getLineTypeControl(unsigned int dObject
                                                             CADBuffer &buffer)
 {
     CADLineTypeControlObject * ltypeControl = new CADLineTypeControlObject();
-    ltypeControl->setSize( dObjectSize );
-    ltypeControl->nObjectSizeInBits = buffer.ReadRAWLONG();
-    ltypeControl->hObjectHandle     = buffer.ReadHANDLE();
 
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
+    if(!readBasicData(ltypeControl, dObjectSize, buffer))
     {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        ltypeControl->aEED.push_back( dwgEed );
+        delete ltypeControl;
+        return nullptr;
     }
 
-    ltypeControl->nNumReactors = buffer.ReadBITLONG();
     ltypeControl->nNumEntries  = buffer.ReadBITLONG();
     if(ltypeControl->nNumEntries < 0)
     {
@@ -2957,33 +2845,12 @@ CADLineTypeObject * DWGFileR2000::getLineType1(unsigned int dObjectSize, CADBuff
 {
     CADLineTypeObject * ltype = new CADLineTypeObject();
 
-    ltype->setSize( dObjectSize );
-    ltype->nObjectSizeInBits = buffer.ReadRAWLONG();
-    ltype->hObjectHandle     = buffer.ReadHANDLE();
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        ltype->aEED.push_back( dwgEed );
-    }
-
-    ltype->nNumReactors = buffer.ReadBITLONG();
-    if(ltype->nNumReactors < 0)
+    if(!readBasicData(ltype, dObjectSize, buffer))
     {
         delete ltype;
         return nullptr;
     }
+
     ltype->sEntryName   = buffer.ReadTV();
     ltype->b64Flag      = buffer.ReadBIT();
     ltype->dXRefIndex   = buffer.ReadBITSHORT();
@@ -3572,34 +3439,12 @@ CADImageDefObject * DWGFileR2000::getImageDef(unsigned int dObjectSize,
 {
     CADImageDefObject * imagedef = new CADImageDefObject();
 
-    imagedef->setSize( dObjectSize );
-    imagedef->nObjectSizeInBits = buffer.ReadRAWLONG();
-    imagedef->hObjectHandle     = buffer.ReadHANDLE8BLENGTH();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        imagedef->aEED.push_back( dwgEed );
-    }
-
-    imagedef->nNumReactors  = buffer.ReadBITLONG();
-    if(imagedef->nNumReactors < 0)
+    if(!readBasicData(imagedef, dObjectSize, buffer))
     {
         delete imagedef;
         return nullptr;
     }
+
     imagedef->dClassVersion = buffer.ReadBITLONG();
 
     imagedef->dfXImageSizeInPx = buffer.ReadRAWDOUBLE();
@@ -3630,34 +3475,12 @@ CADImageDefReactorObject * DWGFileR2000::getImageDefReactor(unsigned int dObject
 {
     CADImageDefReactorObject * imagedefreactor = new CADImageDefReactorObject();
 
-    imagedefreactor->setSize( dObjectSize );
-    imagedefreactor->nObjectSizeInBits = buffer.ReadRAWLONG();
-    imagedefreactor->hObjectHandle     = buffer.ReadHANDLE8BLENGTH();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        imagedefreactor->aEED.push_back( dwgEed );
-    }
-
-    imagedefreactor->nNumReactors  = buffer.ReadBITLONG();
-    if(imagedefreactor->nNumReactors < 0)
+    if(!readBasicData(imagedefreactor, dObjectSize, buffer))
     {
         delete imagedefreactor;
         return nullptr;
     }
+
     imagedefreactor->dClassVersion = buffer.ReadBITLONG();
 
     imagedefreactor->hParentHandle =buffer.ReadHANDLE();
@@ -3677,37 +3500,18 @@ CADXRecordObject * DWGFileR2000::getXRecord(unsigned int dObjectSize, CADBuffer 
 {
     CADXRecordObject * xrecord = new CADXRecordObject();
 
-    xrecord->setSize( dObjectSize );
-    xrecord->nObjectSizeInBits = buffer.ReadRAWLONG();
-    xrecord->hObjectHandle     = buffer.ReadHANDLE8BLENGTH();
-
-    short  dEEDSize = 0;
-    CADEed dwgEed;
-    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
-    {
-        dwgEed.dLength      = dEEDSize;
-        dwgEed.hApplication = buffer.ReadHANDLE();
-
-        if(dEEDSize > 0)
-        {
-            for( short i = 0; i < dEEDSize; ++i )
-            {
-                dwgEed.acData.push_back( buffer.ReadCHAR() );
-            }
-        }
-
-        xrecord->aEED.push_back( dwgEed );
-    }
-
-    xrecord->nNumReactors  = buffer.ReadBITLONG();
-    // TODO: Need reasonable nNumReactors limits.
-    if(xrecord->nNumReactors < 0 || xrecord->nNumReactors > 5000)
+    if(!readBasicData(xrecord, dObjectSize, buffer))
     {
         delete xrecord;
         return nullptr;
     }
-    xrecord->nNumDataBytes = buffer.ReadBITLONG();
 
+    xrecord->nNumDataBytes = buffer.ReadBITLONG();
+    if(xrecord->nNumDataBytes < 0)
+    {
+        delete xrecord;
+        return nullptr;
+    }
     for( long i = 0; i < xrecord->nNumDataBytes; ++i )
     {
         xrecord->abyDataBytes.push_back( buffer.ReadCHAR() );
@@ -3915,4 +3719,39 @@ unsigned short DWGFileR2000::validateEntityCRC(CADBuffer& buffer,
         return 0; // If CRC equal 0 - this is error
     }
     return CRC;
+}
+
+bool DWGFileR2000::readBasicData(CADBaseControlObject *pBaseControlObject,
+                           unsigned int dObjectSize,
+                           CADBuffer &buffer)
+{
+    pBaseControlObject->setSize( dObjectSize );
+    pBaseControlObject->nObjectSizeInBits = buffer.ReadRAWLONG();
+    pBaseControlObject->hObjectHandle = buffer.ReadHANDLE();
+    short  dEEDSize = 0;
+    CADEed dwgEed;
+    while( ( dEEDSize = buffer.ReadBITSHORT() ) != 0 )
+    {
+        dwgEed.dLength = dEEDSize;
+        dwgEed.hApplication = buffer.ReadHANDLE();
+
+        if(dEEDSize > 0)
+        {
+            for( short i = 0; i < dEEDSize; ++i )
+            {
+                dwgEed.acData.push_back( buffer.ReadCHAR() );
+            }
+        }
+
+        pBaseControlObject->aEED.push_back( dwgEed );
+    }
+
+    pBaseControlObject->nNumReactors = buffer.ReadBITLONG();
+    // TODO: Need reasonable nNumReactors limits.
+    if(pBaseControlObject->nNumReactors < 0 ||
+       pBaseControlObject->nNumReactors > 5000)
+    {
+        return false;
+    }
+    return true;
 }

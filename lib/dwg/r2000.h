@@ -201,6 +201,9 @@ protected:
     unsigned short validateEntityCRC(CADBuffer& buffer, unsigned int dObjectSize,
                                      const char * entityName = "ENTITY",
                                      bool bSwapEndianness = false );
+    bool readBasicData(CADBaseControlObject * pBaseControlObject,
+                       unsigned int dObjectSize,
+                       CADBuffer &buffer);
 protected:
     int                               imageSeeker;
     std::vector<SectionLocatorRecord> sectionLocatorRecords;
