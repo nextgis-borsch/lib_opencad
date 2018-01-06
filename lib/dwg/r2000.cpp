@@ -926,6 +926,11 @@ CADObject * DWGFileR2000::GetObject( long dHandle, bool bHandlesOnly )
         }
         stCommonEntityData.bbEntMode        = objectBuffer.Read2B();
         stCommonEntityData.nNumReactors     = objectBuffer.ReadBITLONG();
+        if(stCommonEntityData.nNumReactors < 0 ||
+           stCommonEntityData.nNumReactors > 5000)
+        {
+            return nullptr;
+        }
         stCommonEntityData.bNoLinks         = objectBuffer.ReadBIT();
         stCommonEntityData.nCMColor         = objectBuffer.ReadBITSHORT();
         stCommonEntityData.dfLTypeScale     = objectBuffer.ReadBITDOUBLE();
@@ -2920,10 +2925,10 @@ CADMLineObject * DWGFileR2000::getMLine(unsigned int dObjectSize,
         return nullptr;
     }
 
-    CADMLineVertex stVertex;
-    CADLineStyle   stLStyle;
-    for( long i = 0; i < mline->nNumVertexes; ++i )
+    for( short i = 0; i < mline->nNumVertexes; ++i )
     {
+        CADMLineVertex stVertex;
+
         CADVector vertPosition = buffer.ReadVector();
         stVertex.vertPosition = vertPosition;
 
@@ -2932,16 +2937,17 @@ CADMLineObject * DWGFileR2000::getMLine(unsigned int dObjectSize,
 
         CADVector vectMIterDirection = buffer.ReadVector();
         stVertex.vectMIterDirection = vectMIterDirection;
-        for( size_t j = 0; j < mline->nLinesInStyle; ++j )
-        {
+        for( unsigned char j = 0; j < mline->nLinesInStyle; ++j )
+        {            
+            CADLineStyle   stLStyle;
             stLStyle.nNumSegParms = buffer.ReadBITSHORT();
-            if(stLStyle.nNumSegParms > 0) // Or return null here?
+            if( stLStyle.nNumSegParms > 0 ) // Or return null here?
             {
                 for( short k = 0; k < stLStyle.nNumSegParms; ++k )
                     stLStyle.adfSegparms.push_back( buffer.ReadBITDOUBLE() );
             }
             stLStyle.nAreaFillParms = buffer.ReadBITSHORT();
-            if(stLStyle.nAreaFillParms < 0)
+            if( stLStyle.nAreaFillParms > 0 )
             {
                 for( short k = 0; k < stLStyle.nAreaFillParms; ++k )
                     stLStyle.adfAreaFillParameters.push_back( buffer.ReadBITDOUBLE() );
