@@ -366,6 +366,12 @@ function(find_extproject name)
     )
 
     if(NOT EXISTS "${EXT_SOURCE_DIR}/.git")
+        if(EXISTS ${EXT_SOURCE_DIR})
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E remove_directory ${EXT_SOURCE_DIR}
+                WORKING_DIRECTORY  ${EXT_DOWNLOAD_DIR}
+            )
+        endif()
         color_message("Git clone ${name} ...")
 
         set(error_code 1)
