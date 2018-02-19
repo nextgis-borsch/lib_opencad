@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016-2017 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2018 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -118,7 +118,7 @@ set(TARGET_LINK ${TARGET_LINK} ${LIB_NAME} PARENT_SCOPE)
 
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
     install(TARGETS ${INSTALL_TARGETS}
-        #EXPORT ${INSTALL_TARGETS}
+        EXPORT ${PACKAGE_UPPER_NAME}Targets
         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT libraries
         ARCHIVE DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
         LIBRARY DESTINATION ${INSTALL_LIB_DIR} COMPONENT libraries
@@ -129,3 +129,13 @@ endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL)
     install(FILES ${HHEADERS} DESTINATION "${INSTALL_INC_DIR}" COMPONENT headers)
 endif()
+
+# Add path to includes to build-tree export
+target_include_directories(${LIB_NAME} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
+
+# Add all targets to the build-tree export set
+export(TARGETS ${INSTALL_TARGETS}
+    FILE ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Targets.cmake)

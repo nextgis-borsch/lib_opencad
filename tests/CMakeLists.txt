@@ -29,10 +29,8 @@
 #  SOFTWARE.
 ################################################################################
 
-option(BUILD_TESTS "Build unit tests" OFF)
-if(BUILD_TESTS)
-    include(CTest)
-
+option(BUILD_TESTING "Build unit tests" OFF)
+if(BUILD_TESTING)
     set(WITH_GTest ON CACHE BOOL "Google test on")
     set(WITH_GTest_EXTERNAL ON CACHE BOOL "Google test external on")
     find_anyproject(GTest REQUIRED)
@@ -50,7 +48,9 @@ if(BUILD_TESTS)
     file(COPY data/r2000 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
 
     add_executable(io_test
-                   io_check.cpp)
+        io_check.cpp
+        ${CMAKE_SOURCE_DIR}/lib/dwg/io.cpp
+    )
     target_link_extlibraries(io_test)
     add_test( io_test io_test )
 

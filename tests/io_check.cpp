@@ -13,7 +13,12 @@ TEST(bitshort, bitshort_full_offset0)
     buffer[0] = 0b00110000;
     buffer[1] = 0b11000011;
     buffer[2] = 0b11000000;
-    short a = ReadBITSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadBITSHORT();
     ASSERT_EQ (4035, a);
 }
 
@@ -25,7 +30,12 @@ TEST(bitshort, bitshort_full_offset1)
     buffer[0] = 0b00011000;
     buffer[1] = 0b01100001;
     buffer[2] = 0b11100000;
-    short a = ReadBITSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadBITSHORT();
     ASSERT_EQ (4035, a);
 }
 
@@ -37,7 +47,12 @@ TEST(bitshort, bitshort_unsigned_char_offset0)
     buffer[0] = 0b01100010;
     buffer[1] = 0b10110000;
     buffer[2] = 0b11000000;
-    short a = ReadBITSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadBITSHORT();
     ASSERT_EQ (138, a);
 }
 
@@ -49,7 +64,12 @@ TEST(bitshort, bitshort_0_offset0)
     buffer[0] = 0b10000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    short a = ReadBITSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadBITSHORT();
     ASSERT_EQ (0, a);
 }
 
@@ -60,7 +80,12 @@ TEST(bitshort, bitshort_256_offset0)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    short a = ReadBITSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadBITSHORT();
     ASSERT_EQ (256, a);
 }
 
@@ -75,7 +100,12 @@ TEST(triplebits, triplebits_offset0)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (6, a);
 }
 
@@ -86,7 +116,12 @@ TEST(triplebits, triplebits_offset1)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (4, a);
 }
 
@@ -97,7 +132,12 @@ TEST(triplebits, triplebits_offset2)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (0, a);
 }
 
@@ -108,7 +148,12 @@ TEST(triplebits, triplebits_offset3)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (0, a);
 }
 
@@ -119,7 +164,12 @@ TEST(triplebits, triplebits_offset6)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (3, a);
 }
 
@@ -130,7 +180,12 @@ TEST(triplebits, triplebits_offset7)
     buffer[0] = 0b11000001;
     buffer[1] = 0b10000000;
     buffer[2] = 0b00000001;
-    char a = Read3B ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    char a = buff.Read3B();
     ASSERT_EQ (6, a);
 }
 
@@ -147,7 +202,12 @@ TEST(rawshort, rawshort_offset0)
     buffer[0] = 0b11100011;
     buffer[1] = 0b11111000;
     buffer[2] = 0b00000001;
-    short a = ReadRAWSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadRAWSHORT();
     ASSERT_EQ (-1821, a);
 }
 
@@ -159,7 +219,12 @@ TEST(rawshort, rawshort_offset6)
     buffer[0] = 0b00000010;
     buffer[1] = 0b11110101;
     buffer[2] = 0b00100000;
-    short a = ReadRAWSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadRAWSHORT();
     ASSERT_EQ (18621, a);
 }
 
@@ -171,6 +236,11 @@ TEST(rawshort, rawshort_offset7)
     buffer[0] = 0b00000001;
     buffer[1] = 0b10110001;
     buffer[2] = 0b01110001;
-    short a = ReadRAWSHORT ( buffer, bitOffsetFromStart );
+
+    CADBuffer buff(4);
+    buff.WriteRAW(&buffer, 3);
+    buff.Seek(bitOffsetFromStart, CADBuffer::BEG);
+
+    short a = buff.ReadRAWSHORT();
     ASSERT_EQ (-18216, a);
 }
