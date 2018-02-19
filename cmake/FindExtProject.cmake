@@ -351,19 +351,6 @@ function(find_extproject name)
     endif()
 
     include(ExternalProject)
-    ExternalProject_Add(${name}_EP
-        TMP_DIR ${EXT_TMP_DIR}
-        STAMP_DIR ${EXT_STAMP_DIR}
-        DOWNLOAD_DIR ${EXT_DOWNLOAD_DIR}
-        SOURCE_DIR ${EXT_SOURCE_DIR}
-        BINARY_DIR ${EXT_BINARY_DIR}
-        INSTALL_DIR ${EXT_INSTALL_DIR}
-        GIT_REPOSITORY ${repo_url}
-        GIT_TAG ${repo_branch}
-        GIT_SHALLOW TRUE
-        CMAKE_ARGS ${find_extproject_CMAKE_ARGS}
-        UPDATE_DISCONNECTED ${EXT_UPDATE_DISCONNECTED}
-    )
 
     if(NOT EXISTS "${EXT_SOURCE_DIR}/.git")
         if(EXISTS ${EXT_SOURCE_DIR})
@@ -395,6 +382,20 @@ function(find_extproject name)
             ${find_extproject_CMAKE_ARGS}
             WORKING_DIRECTORY ${EXT_BINARY_DIR})
     endif()
+
+    ExternalProject_Add(${name}_EP
+        TMP_DIR ${EXT_TMP_DIR}
+        STAMP_DIR ${EXT_STAMP_DIR}
+        DOWNLOAD_DIR ${EXT_DOWNLOAD_DIR}
+        SOURCE_DIR ${EXT_SOURCE_DIR}
+        BINARY_DIR ${EXT_BINARY_DIR}
+        INSTALL_DIR ${EXT_INSTALL_DIR}
+        GIT_REPOSITORY ${repo_url}
+        GIT_TAG ${repo_branch}
+        GIT_SHALLOW TRUE
+        CMAKE_ARGS ${find_extproject_CMAKE_ARGS}
+        UPDATE_DISCONNECTED ${EXT_UPDATE_DISCONNECTED}
+    )
 
     if(CMAKE_CROSSCOMPILING OR ANDROID OR IOS)
         set( CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY )
