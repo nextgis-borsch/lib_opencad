@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016-2017 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2018 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal

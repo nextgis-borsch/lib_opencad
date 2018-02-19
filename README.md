@@ -2,7 +2,7 @@
 
 OpenSource library under X11/MIT license for everyday use. Under development,
 but some of basic functionality is already available.
-Now supported DWG R2000. 
+Now supported DWG R2000.
 
 # License
 
@@ -10,4 +10,5 @@ Now supported DWG R2000.
 
 # Borsch
 
-Borsch repository link: https://github.com/nextgis-borsch/borsch
+[NextGIS Borsch](https://github.com/nextgis-borsch/borsch) helps to resolve
+dependencies of building C/C++ libraries and applications. NextGIS Borsch is based on [CMake](https://cmake.org/).
