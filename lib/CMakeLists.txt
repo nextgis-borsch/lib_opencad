@@ -99,6 +99,7 @@ elseif(OSX_FRAMEWORK)
       SOVERSION ${SOVERSION}
       )
 else()
+    add_definitions(-DOCAD_STATIC)
     add_library(${LIB_NAME} STATIC ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
 endif()
 
