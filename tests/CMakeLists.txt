@@ -65,13 +65,13 @@ if(BUILD_TESTING)
         file(GLOB_RECURSE IMPORTED_WIN_DLLS ${CMAKE_BINARY_DIR}/third-party/*.dll)
         set(IMPORTED_WIN_DLLS ${IMPORTED_WIN_DLLS} $<TARGET_FILE:${TARGET_LINK}>)
         foreach(IMPORTED_WIN_DLL ${IMPORTED_WIN_DLLS})
-            add_custom_command(TARGET io_test
+            add_custom_command(TARGET geometry_test
                                 POST_BUILD
-                                COMMAND ${CMAKE_COMMAND} -E copy ${IMPORTED_WIN_DLL} $<TARGET_FILE_DIR:io_test>
-                                COMMENT "Copy ${IMPORTED_WIN_DLL} to $<TARGET_FILE_DIR:io_test>"
+                                COMMAND ${CMAKE_COMMAND} -E copy ${IMPORTED_WIN_DLL} $<TARGET_FILE_DIR:geometry_test>
+                                COMMENT "Copy ${IMPORTED_WIN_DLL} to test directory"
+                                VERBATIM
                             )
 
         endforeach()
     endif()
-
 endif()
