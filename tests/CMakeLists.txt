@@ -62,8 +62,7 @@ if(BUILD_TESTING)
     add_test( geometry_test geometry_test )
 
     if(WIN32)
-        file(GLOB_RECURSE IMPORTED_WIN_DLLS ${CMAKE_BINARY_DIR}/third-party/*.dll)
-        set(IMPORTED_WIN_DLLS ${IMPORTED_WIN_DLLS} $<TARGET_FILE:${TARGET_LINK}>)
+        file(GLOB IMPORTED_WIN_DLLS "${CMAKE_BINARY_DIR}\\third-party\\install\\bin\\*.dll")
         foreach(IMPORTED_WIN_DLL ${IMPORTED_WIN_DLLS})
             add_custom_command(TARGET geometry_test
                                 POST_BUILD
@@ -71,7 +70,12 @@ if(BUILD_TESTING)
                                 COMMENT "Copy ${IMPORTED_WIN_DLL} to test directory"
                                 VERBATIM
                             )
-
         endforeach()
+        add_custom_command(TARGET io_test
+                            POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_LINK}> $<TARGET_FILE_DIR:geometry_test>
+                            COMMENT "Copy lib_opencad to test directory"
+                            VERBATIM
+                        )
     endif()
 endif()
