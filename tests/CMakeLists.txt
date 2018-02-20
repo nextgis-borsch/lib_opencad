@@ -33,7 +33,7 @@ option(BUILD_TESTING "Build unit tests" OFF)
 if(BUILD_TESTING)
     set(WITH_GTest ON CACHE BOOL "Google test on")
     set(WITH_GTest_EXTERNAL ON CACHE BOOL "Google test external on")
-    find_anyproject(GTest REQUIRED)
+    find_anyproject(GTest REQUIRED SHARED OFF)
     include_directories(${PROJECT_SOURCE_DIR}/lib)
 
 
