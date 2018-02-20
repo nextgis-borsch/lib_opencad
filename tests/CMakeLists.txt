@@ -33,15 +33,18 @@ option(BUILD_TESTING "Build unit tests" OFF)
 if(BUILD_TESTING)
     set(WITH_GTest ON CACHE BOOL "Google test on")
     set(WITH_GTest_EXTERNAL ON CACHE BOOL "Google test external on")
-    find_anyproject(GTest REQUIRED SHARED OFF)
+    find_anyproject(GTest REQUIRED)
     include_directories(${PROJECT_SOURCE_DIR}/lib)
 
-
+    set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${TARGET_LINK})
     find_package(Threads)
-    set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS} ${TARGET_LINK})
-
+    if(CMAKE_THREAD_LIBS_INIT)
+        set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${CMAKE_THREAD_LIBS_INIT} ${CMAKE_DL_LIBS})
+    endif()
     find_library(M_LIB m)
-    set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${M_LIB})
+    if(M_LIB)
+        set(TARGET_LINK_LIB ${TARGET_LINK_LIB} ${M_LIB})
+    endif()
 
     file(COPY data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     file(COPY data/r2000 DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data)
@@ -57,5 +60,18 @@ if(BUILD_TESTING)
                    reading_geometries.cpp)
     target_link_extlibraries(geometry_test)
     add_test( geometry_test geometry_test )
+
+    if(WIN32)
+        file(GLOB_RECURSE IMPORTED_WIN_DLLS ${CMAKE_BINARY_DIR}/third-party/*.dll)
+        set(IMPORTED_WIN_DLLS ${IMPORTED_WIN_DLLS} $<TARGET_FILE:${TARGET_LINK}>)
+        foreach(IMPORTED_WIN_DLL ${IMPORTED_WIN_DLLS})
+            add_custom_command(TARGET io_test
+                                POST_BUILD
+                                COMMAND ${CMAKE_COMMAND} -E copy ${IMPORTED_WIN_DLL} $<TARGET_FILE_DIR:io_test>
+                                COMMENT "Copy ${IMPORTED_WIN_DLL} to $<TARGET_FILE_DIR:io_test>"
+                            )
+
+        endforeach()
+    endif()
 
 endif()

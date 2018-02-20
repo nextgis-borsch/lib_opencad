@@ -33,6 +33,10 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 project(apps)
 
+if(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
+endif()
+
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
 set(CSOURCES
@@ -45,6 +49,8 @@ target_link_libraries(cadinfo ${TARGET_LINK})
 
 if(OSX_FRAMEWORK)
     set_target_properties(cadinfo PROPERTIES INSTALL_RPATH "@executable_path/../../Library/Frameworks")
+elseif(WIN32)
+    set_target_properties(cadinfo PROPERTIES LINK_FLAGS "/ignore:4099")
 endif()
 
 if(NOT SKIP_INSTALL_EXECUTABLES AND NOT SKIP_INSTALL_ALL )

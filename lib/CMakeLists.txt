@@ -36,6 +36,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if(UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+elseif(WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
 endif()
 
 set(OBJ_LIB)
@@ -83,7 +85,9 @@ if(BUILD_SHARED_LIBS)
         DEFINE_SYMBOL OCAD_EXPORTS
     )
     if(MSVC)
-        set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_i.lib")
+        set_target_properties(${LIB_NAME} PROPERTIES
+                                    IMPORT_SUFFIX "_i.lib"
+                                    LINK_FLAGS "/ignore:4049 /ignore:4217")
     endif()
 elseif(OSX_FRAMEWORK)
     add_library(${LIB_NAME} SHARED ${CSOURCES} ${HHEADERS} ${HHEADER_PRIV} ${OBJ_LIB})
