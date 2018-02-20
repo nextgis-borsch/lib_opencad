@@ -377,6 +377,11 @@ function(find_extproject name)
         endif()
 
         color_message("Configure ${name} ...")
+        if(NOT EXISTS ${EXT_BINARY_DIR})
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${EXT_BINARY_DIR}
+            )
+        endif()
         execute_process(COMMAND ${CMAKE_COMMAND} ${EXT_SOURCE_DIR}
             ${find_extproject_CMAKE_ARGS}
             WORKING_DIRECTORY ${EXT_BINARY_DIR})
