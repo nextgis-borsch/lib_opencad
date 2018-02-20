@@ -353,10 +353,9 @@ function(find_extproject name)
     include(ExternalProject)
 
     if(NOT EXISTS "${EXT_SOURCE_DIR}/.git")
-        if(EXISTS ${EXT_SOURCE_DIR})
+        if(NOT EXISTS ${EXT_DOWNLOAD_DIR})
             execute_process(
-                COMMAND ${CMAKE_COMMAND} -E remove_directory ${EXT_SOURCE_DIR}
-                WORKING_DIRECTORY  ${EXT_DOWNLOAD_DIR}
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${EXT_DOWNLOAD_DIR}
             )
         endif()
         color_message("Git clone ${name} ...")
