@@ -52,14 +52,15 @@ if(OSX_FRAMEWORK AND (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
 endif()
 
 if(OSX_FRAMEWORK)
-  set(INSTALL_BIN_DIR "bin" CACHE INTERNAL "Installation directory for executables" FORCE)
-  set(INSTALL_LIB_DIR "Library/Frameworks" CACHE INTERNAL "Installation directory for libraries" FORCE)
-  set(INSTALL_INC_DIR "${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Headers" CACHE INTERNAL "Installation directory for headers" FORCE)
-  set(SKIP_INSTALL_EXECUTABLES OFF)
-  set(SKIP_INSTALL_EXPORT ON)
-  set(SKIP_INSTALL_FILES ON)
-  set(SKIP_INSTALL_DOCS OFF)
-  set(CMAKE_MACOSX_RPATH ON)
+    set(INSTALL_BIN_DIR "bin" CACHE INTERNAL "Installation directory for executables" FORCE)
+    set(INSTALL_LIB_DIR "Library/Frameworks" CACHE INTERNAL "Installation directory for libraries" FORCE)
+    set(INSTALL_INC_DIR "${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Headers" CACHE INTERNAL "Installation directory for headers" FORCE)
+    set(SKIP_INSTALL_EXECUTABLES OFF)
+    set(SKIP_INSTALL_EXPORT ON)
+    set(SKIP_INSTALL_FILES ON)
+    set(SKIP_INSTALL_DOCS OFF)
+    set(CMAKE_MACOSX_RPATH ON)
+    set(INSTALL_CMAKECONF_DIR ${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Resources/CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
 else()
     include(GNUInstallDirs)
     set(INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR} CACHE INTERNAL "Installation directory for executables" FORCE)
@@ -78,7 +79,6 @@ set(SOVERSION 1)
 if(OSX_FRAMEWORK)
     set(FRAMEWORK_VERSION "${OCAD_MAJOR_VERSION}")
     set(INSTALL_INC_DIR "${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Versions/${FRAMEWORK_VERSION}/Headers" CACHE INTERNAL "Installation directory for headers" FORCE)
-    set(INSTALL_CMAKECONF_DIR ${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Versions/${FRAMEWORK_VERSION}/Resources/CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
     set(INSTALL_DOC_DIR "${INSTALL_LIB_DIR}/${PROJECT_NAME}.framework/Versions/${FRAMEWORK_VERSION}/Resources/docs")
 endif()
 
@@ -143,20 +143,6 @@ if(REGISTER_PACKAGE)
     # Export the package for use from the build-tree
     # (this registers the build-tree with a global CMake-registry)
     export(PACKAGE ${PACKAGE_UPPER_NAME})
-endif()
-
-# Create the ZLIBConfig.cmake file
-configure_file(cmake/PackageConfig.cmake.in
-    ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Config.cmake @ONLY)
-
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
-    # Install the <Package>Config.cmake
-    install(FILES
-      ${PROJECT_BINARY_DIR}/${PACKAGE_UPPER_NAME}Config.cmake
-      DESTINATION ${INSTALL_CMAKECONF_DIR} COMPONENT dev)
-
-    # Install the export set for use with the install-tree
-    install(EXPORT ${PACKAGE_UPPER_NAME}Targets DESTINATION ${INSTALL_CMAKECONF_DIR} COMPONENT dev)
 endif()
 
 # Archiving ====================================================================
