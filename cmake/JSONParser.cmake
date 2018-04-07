@@ -27,7 +27,7 @@ cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 if(POLICY CMP0054)
     # http://www.cmake.org/cmake/help/v3.1/policy/CMP0054.html
     # See the discussion https://github.com/CGAL/cgal/issues/189
-    cmake_policy(SET CMP0054 OLD)
+    cmake_policy(SET CMP0054 NEW)
  endif()
 
 if (DEFINED JSonParserGuard)

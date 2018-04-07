@@ -35,15 +35,15 @@ function(get_binary_package repo repo_type exact_version download_url name)
     get_compiler_version(COMPILER)
 
     if(repo_type STREQUAL "github") # TODO: Add gitlab here.
-        if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/latest.json)
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/${repo}_latest.json)
             file(DOWNLOAD
                 https://api.github.com/repos/${repo}/releases/latest
-                ${CMAKE_CURRENT_BINARY_DIR}/${repo}_latest.json
+                ${CMAKE_BINARY_DIR}/${repo}_latest.json
                 TLS_VERIFY OFF
             )
         endif()
         # Get assets files.
-        file(READ ${CMAKE_CURRENT_BINARY_DIR}/${repo}_latest.json _JSON_CONTENTS)
+        file(READ ${CMAKE_BINARY_DIR}/${repo}_latest.json _JSON_CONTENTS)
 
         if(BUILD_STATIC_LIBS)
             set(STATIC_PREFIX "static-")
@@ -73,7 +73,7 @@ endfunction()
 function(find_extproject name)
     set(options OPTIONAL EXACT)
     set(oneValueArgs VERSION SHARED)
-    set(multiValueArgs CMAKE_ARGS)
+    set(multiValueArgs CMAKE_ARGS COMPONENTS NAMES)
     cmake_parse_arguments(find_extproject "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     # Set default third party lib path.
@@ -99,10 +99,10 @@ function(find_extproject name)
 
     if(BINARY_URL)
         # Download binary build files.
-        if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${name}.zip)
+        if(NOT EXISTS ${CMAKE_BINARY_DIR}/${name}.zip)
             file(DOWNLOAD
                 ${BINARY_URL}
-                ${CMAKE_CURRENT_BINARY_DIR}/${name}.zip
+                ${CMAKE_BINARY_DIR}/${name}.zip
                 TLS_VERIFY OFF
             )
         endif()
@@ -112,7 +112,7 @@ function(find_extproject name)
             COMMAND ${CMAKE_COMMAND} -E make_directory ${EXT_INSTALL_DIR}
         )
         execute_process(
-            COMMAND ${CMAKE_COMMAND} -E tar xfz ${CMAKE_CURRENT_BINARY_DIR}/${name}.zip
+            COMMAND ${CMAKE_COMMAND} -E tar xfz ${CMAKE_BINARY_DIR}/${name}.zip
             WORKING_DIRECTORY ${EXT_INSTALL_DIR}
         )
         # Execute find_package and send version, libraries, includes upper cmake script.
@@ -121,7 +121,16 @@ function(find_extproject name)
         else()
             set(CMAKE_PREFIX_PATH ${EXT_INSTALL_DIR}/${BINARY_NAME})
         endif()
-        find_package(${name} NO_MODULE)
+
+        if(find_extproject_COMPONENTS)
+            set(FIND_PROJECT_ARG ${FIND_PROJECT_ARG} COMPONENTS ${find_extproject_COMPONENTS})
+        endif()
+
+        if(find_extproject_NAMES)
+            set(FIND_PROJECT_ARG ${FIND_PROJECT_ARG} NAMES ${find_extproject_NAMES})
+        endif()
+
+        find_package(${name} NO_MODULE ${FIND_PROJECT_ARG})
 
         string(TOUPPER ${name} UPPER_NAME)
         set(${UPPER_NAME}_FOUND ${${UPPER_NAME}_FOUND} PARENT_SCOPE)
@@ -130,6 +139,7 @@ function(find_extproject name)
         set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} PARENT_SCOPE)
         set(${UPPER_NAME}_INCLUDE_DIRS ${${UPPER_NAME}_INCLUDE_DIRS} PARENT_SCOPE)
 
+        set_target_properties(${${UPPER_NAME}_LIBRARIES} PROPERTIES IMPORTED_GLOBAL TRUE)
         return()
     endif()
 
@@ -367,7 +377,7 @@ function(find_extproject name)
     )
 
     if(NOT EXISTS "${EXT_SOURCE_DIR}/.git")
-        color_message("Git clone ${name} ...")
+        color_message("Git clone ${repo_name} ...")
 
         set(error_code 1)
         set(number_of_tries 0)
@@ -385,7 +395,7 @@ function(find_extproject name)
             return()
         endif()
 
-        color_message("Configure ${name} ...")
+        color_message("Configure ${repo_name} ...")
         execute_process(COMMAND ${CMAKE_COMMAND} ${EXT_SOURCE_DIR}
             ${find_extproject_CMAKE_ARGS}
             WORKING_DIRECTORY ${EXT_BINARY_DIR})
@@ -398,7 +408,17 @@ function(find_extproject name)
     endif()
 
     string(TOUPPER ${name} UPPER_NAME)
-    include(${EXT_BINARY_DIR}/${UPPER_NAME}Config.cmake)
+    if(EXISTS ${EXT_BINARY_DIR}/${UPPER_NAME}Config.cmake)
+        include(${EXT_BINARY_DIR}/${UPPER_NAME}Config.cmake)
+    else()
+        foreach(ALT_NAME ${find_extproject_NAMES})
+            string(TOUPPER ${ALT_NAME} ALT_UPPER_NAME)
+            if(EXISTS ${EXT_BINARY_DIR}/${ALT_UPPER_NAME}Config.cmake)
+                include(${EXT_BINARY_DIR}/${ALT_UPPER_NAME}Config.cmake)
+                break()
+            endif()
+        endforeach()
+    endif()
 
     set(${UPPER_NAME}_FOUND ${${UPPER_NAME}_FOUND} PARENT_SCOPE)
     set(${UPPER_NAME}_VERSION ${${UPPER_NAME}_VERSION} PARENT_SCOPE)
@@ -406,11 +426,16 @@ function(find_extproject name)
     set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} PARENT_SCOPE)
     set(${UPPER_NAME}_INCLUDE_DIRS ${${UPPER_NAME}_INCLUDE_DIRS} PARENT_SCOPE)
 
+    set_target_properties(${${UPPER_NAME}_LIBRARIES} PROPERTIES IMPORTED_GLOBAL TRUE)
+
     add_dependencies(${${UPPER_NAME}_LIBRARIES} ${name}_EP)
 
     # On static build we need all targets in TARGET_LINK_LIB
-    # Add to list imported targets with GLOBAL?
-    set(EXPORTS_PATHS "${EXPORTS_PATHS} ${EXT_BINARY_DIR}/${UPPER_NAME}Targets.cmake" PARENT_SCOPE)
+    if(ALT_UPPER_NAME)
+        set(EXPORTS_PATHS "${EXPORTS_PATHS} ${EXT_BINARY_DIR}/${ALT_UPPER_NAME}Targets.cmake" PARENT_SCOPE)
+    else()
+        set(EXPORTS_PATHS "${EXPORTS_PATHS} ${EXT_BINARY_DIR}/${UPPER_NAME}Targets.cmake" PARENT_SCOPE)
+    endif()
 
     # For static builds we need all libraries list in main project.
     if(EXISTS ${EXT_BINARY_DIR}/ext_options.cmake)
