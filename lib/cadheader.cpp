@@ -227,6 +227,7 @@ long CADHandle::getAsLong(const std::vector<unsigned char>& handle)
     return result;
 }
 
+
 bool CADHandle::isNull() const
 {
     return handleOrOffset.empty() ? true : false;

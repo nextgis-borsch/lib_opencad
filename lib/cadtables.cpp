@@ -31,9 +31,10 @@
 #include "cadtables.h"
 #include "opencad_api.h"
 
-#include <memory>
 #include <cassert>
 #include <iostream>
+#include <memory>
+#include <set>
 
 using namespace std;
 
@@ -84,13 +85,12 @@ CADHandle CADTables::GetTableHandle( enum TableType eType )
 int CADTables::ReadLayersTable( CADFile * const pCADFile, long dLayerControlHandle )
 {
     // Reading Layer Control obj, and aLayers.
-    CADObject* pCADObject = pCADFile->GetObject( dLayerControlHandle );
+    unique_ptr<CADObject> pCADObject( pCADFile->GetObject( dLayerControlHandle ) );
 
-    unique_ptr<CADLayerControlObject> spLayerControl(
-            dynamic_cast<CADLayerControlObject *>(pCADObject) );
+    CADLayerControlObject* spLayerControl =
+            dynamic_cast<CADLayerControlObject *>(pCADObject.get());
     if( !spLayerControl )
     {
-        delete pCADObject;
         return CADErrorCodes::TABLE_READ_FAILED;
     }
 
@@ -148,8 +148,11 @@ int CADTables::ReadLayersTable( CADFile * const pCADFile, long dLayerControlHand
 
     auto dCurrentEntHandle = spModelSpace->hEntities[0].getAsLong();
     auto dLastEntHandle    = spModelSpace->hEntities[1].getAsLong();
-    while( dCurrentEntHandle != 0 )
+    std::set<long> oVisitedHandles;
+    while( dCurrentEntHandle != 0 &&
+           oVisitedHandles.find(dCurrentEntHandle) == oVisitedHandles.end() )
     {
+        oVisitedHandles.insert(dCurrentEntHandle);
         CADObject* pCADEntityObject = pCADFile->GetObject( dCurrentEntHandle, true );
         unique_ptr<CADEntityObject> spEntityObj(
                     dynamic_cast<CADEntityObject *>( pCADEntityObject ) );
@@ -178,7 +181,7 @@ int CADTables::ReadLayersTable( CADFile * const pCADFile, long dLayerControlHand
         }
     }
 
-    DebugMsg( "Readed aLayers using LayerControl object count: %d\n",
+    DebugMsg( "Read aLayers using LayerControl object count: %d\n",
               static_cast<int>(aLayers.size()) );
 
     return CADErrorCodes::SUCCESS;
