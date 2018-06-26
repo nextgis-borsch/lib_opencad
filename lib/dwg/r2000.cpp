@@ -185,7 +185,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( CADHeader::LUPREC, buffer.ReadBITSHORT() );        // 4
         oHeader.addValue( CADHeader::AUNITS, buffer.ReadBITSHORT() );        // 5
         oHeader.addValue( CADHeader::AUPREC, buffer.ReadBITSHORT() );        // 6
-    } else
+    }
+    else
     {
         for( char i = 0; i < 6; ++i )
             buffer.SkipBITSHORT();
@@ -248,7 +249,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( CADHeader::CELTSCALE, buffer.ReadBITDOUBLE() );// 12
 
         oHeader.addValue( CADHeader::MENU, buffer.ReadTV() );
-    } else
+    }
+    else
     {
         for( char i = 0; i < 12; ++i )
             buffer.SkipBITDOUBLE();
@@ -493,7 +495,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 
         oHeader.addValue( CADHeader::DIMLWD, buffer.ReadBITSHORT() );
         oHeader.addValue( CADHeader::DIMLWE, buffer.ReadBITSHORT() );
-    } else
+    }
+    else
     {
         buffer.SkipTV();
         buffer.SkipTV();
@@ -582,7 +585,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     {
         oHeader.addValue( CADHeader::TSTACKALIGN, buffer.ReadBITSHORT() );
         oHeader.addValue( CADHeader::TSTACKSIZE,  buffer.ReadBITSHORT() );
-    } else
+    }
+    else
     {
         buffer.SkipBITSHORT();
         buffer.SkipBITSHORT();
@@ -645,7 +649,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( UNKNOWN12, buffer.ReadBITSHORT() );
         oHeader.addValue( UNKNOWN13, buffer.ReadBITSHORT() );
         oHeader.addValue( UNKNOWN14, buffer.ReadBITSHORT() );
-    } else
+    }
+    else
     {
         buffer.SkipHANDLE();
         buffer.SkipHANDLE();
