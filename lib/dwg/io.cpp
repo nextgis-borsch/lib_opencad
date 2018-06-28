@@ -588,7 +588,8 @@ long CADBuffer::ReadUMCHAR()
     int nOffset = 0;
     for(unsigned char i = 0; i < nMCharBytesCount; ++i)
     {
-        result += aMCharBytes[i] << nOffset;
+        unsigned long nVal = aMCharBytes[i];
+        result += nVal << nOffset;
         nOffset += 7;
     }
 
@@ -634,7 +635,8 @@ long CADBuffer::ReadMCHAR()
     int nOffset = 0;
     for(unsigned char i = 0; i < nMCharBytesCount; ++i)
     {
-        result += aMCharBytes[i] << nOffset;
+        unsigned long nVal = aMCharBytes[i];
+        result += nVal << nOffset;
         nOffset += 7;
     }
 
