@@ -116,7 +116,8 @@ function(find_extproject name)
             WORKING_DIRECTORY ${EXT_INSTALL_DIR}
         )
         # Execute find_package and send version, libraries, includes upper cmake script.
-        if(OSX_FRAMEWORK AND EXISTS ${EXT_INSTALL_DIR}/${BINARY_NAME}/Library/Frameworks)
+        # The CMake folder in root folder is prefered
+        if(OSX_FRAMEWORK AND NOT EXISTS ${EXT_INSTALL_DIR}/${BINARY_NAME}/CMake AND EXISTS ${EXT_INSTALL_DIR}/${BINARY_NAME}/Library/Frameworks)
             set(CMAKE_PREFIX_PATH ${EXT_INSTALL_DIR}/${BINARY_NAME}/Library/Frameworks)
         else()
             set(CMAKE_PREFIX_PATH ${EXT_INSTALL_DIR}/${BINARY_NAME})
@@ -139,7 +140,11 @@ function(find_extproject name)
         set(${UPPER_NAME}_LIBRARIES ${${UPPER_NAME}_LIBRARIES} PARENT_SCOPE)
         set(${UPPER_NAME}_INCLUDE_DIRS ${${UPPER_NAME}_INCLUDE_DIRS} PARENT_SCOPE)
 
-        set_target_properties(${${UPPER_NAME}_LIBRARIES} PROPERTIES IMPORTED_GLOBAL TRUE)
+        foreach(TARGETG ${${UPPER_NAME}_LIBRARIES})
+            if(TARGET ${TARGETG})
+                set_target_properties(${TARGETG} PROPERTIES IMPORTED_GLOBAL TRUE)
+            endif()
+        endforeach() 
         return()
     endif()
 
