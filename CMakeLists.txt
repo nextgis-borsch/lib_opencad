@@ -8,7 +8,7 @@
 #  The MIT License (MIT)
 #
 #  Copyright (c) 2016 Alexandr Borzykh
-#  Copyright (c) 2016-2018 NextGIS, <info@nextgis.com>
+#  Copyright (c) 2016-2019 NextGIS, <info@nextgis.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,9 @@ else()
     set(INSTALL_CMAKECONF_DIR ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/CMake CACHE INTERNAL "Installation directory for cmake config files" FORCE)
 endif()
 
+set(PACKAGE_NAME ${PROJECT_NAME})
+string(TOUPPER ${PACKAGE_NAME} PACKAGE_UPPER_NAME)
+
 include(util)
 
 check_version(OCAD_MAJOR_VERSION OCAD_MINOR_VERSION OCAD_REV_VERSION)
@@ -114,8 +117,6 @@ else()
 endif()
 
 set(TARGET_LINK)
-set(PACKAGE_NAME ${PROJECT_NAME})
-string(TOUPPER ${PACKAGE_NAME} PACKAGE_UPPER_NAME)
 
 add_subdirectory(lib)
 
