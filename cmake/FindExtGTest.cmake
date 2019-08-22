@@ -23,3 +23,4 @@
 set(repo nextgis-borsch/googletest)
 set(repo_type github)
 # set(repo_branch master) # No need to set as master is default value
+set(repo_bin_url https://api.github.com)
