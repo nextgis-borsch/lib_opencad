@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016-2018 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -318,7 +318,7 @@ public:
 /**
  * @brief The CAD Text Object class
  */
-class CADTextObject : public CADEntityObject
+class CADTextObject final: public CADEntityObject
 {
 public:
     CADTextObject();
@@ -375,7 +375,7 @@ public:
 /**
  * @brief The CAD Attribute definition Object class
  */
-class CADAttdefObject : public CADAttribObject
+class CADAttdefObject final: public CADAttribObject
 {
 public:
     CADAttdefObject();
@@ -386,7 +386,7 @@ public:
 /**
  * @brief The CAD Block Object class
  */
-class CADBlockObject : public CADEntityObject
+class CADBlockObject final: public CADEntityObject
 {
 public:
     CADBlockObject();
@@ -398,7 +398,7 @@ public:
  * @brief The CAD End block Object class
  */
 //TODO: do we need this class? Maybe CADEntityObject enouth?
-class CADEndblkObject : public CADEntityObject
+class CADEndblkObject final: public CADEntityObject
 {
 public:
     CADEndblkObject();
@@ -410,7 +410,7 @@ public:
  * @brief The CADSeqendObject class
  */
 //TODO: do we need this class? Maybe CADEntityObject enouth?
-class CADSeqendObject : public CADEntityObject
+class CADSeqendObject final: public CADEntityObject
 {
 public:
     CADSeqendObject();
@@ -421,7 +421,7 @@ public:
 /**
  * @brief The CADInsertObject class
  */
-class CADInsertObject : public CADEntityObject
+class CADInsertObject final: public CADEntityObject
 {
 public:
     explicit CADInsertObject( ObjectType typeIn = INSERT );
@@ -441,7 +441,7 @@ public:
 /**
  * @brief The CADMInsertObject class
  */
-class CADMInsertObject : public CADEntityObject
+class CADMInsertObject final: public CADEntityObject
 {
 public:
     CADMInsertObject();
@@ -466,7 +466,7 @@ public:
 /**
  * @brief The CADVertex2DObject class
  */
-class CADVertex2DObject : public CADEntityObject
+class CADVertex2DObject final: public CADEntityObject
 {
 public:
     CADVertex2DObject();
@@ -488,7 +488,7 @@ public:
  */
 // TODO: do we need so many identical classes. Maybe CADVector(enum ObjectType eType)
 // for all cases?
-class CADVertex3DObject : public CADEntityObject
+class CADVertex3DObject final: public CADEntityObject
 {
 public:
     CADVertex3DObject();
@@ -499,7 +499,7 @@ public:
 /**
  * @brief The CADVertexMesh class
  */
-class CADVertexMeshObject : public CADEntityObject
+class CADVertexMeshObject final: public CADEntityObject
 {
 public:
     CADVertexMeshObject();
@@ -510,7 +510,7 @@ public:
 /**
  * @brief The CADVertexPFaceObject class
  */
-class CADVertexPFaceObject : public CADEntityObject
+class CADVertexPFaceObject final: public CADEntityObject
 {
 public:
     CADVertexPFaceObject();
@@ -521,7 +521,7 @@ public:
 /**
  * @brief The CADVertexPFaceFaceObject class
  */
-class CADVertexPFaceFaceObject : public CADEntityObject
+class CADVertexPFaceFaceObject final: public CADEntityObject
 {
 public:
     CADVertexPFaceFaceObject();
@@ -536,7 +536,7 @@ public:
 /**
  * @brief The CADPolyline2DObject class
  */
-class CADPolyline2DObject : public CADEntityObject
+class CADPolyline2DObject final: public CADEntityObject
 {
 public:
     CADPolyline2DObject();
@@ -551,7 +551,7 @@ public:
 
     long nObjectsOwned;
 
-    CADHandleArray hVertexes; // content really depends on DWG version.
+    CADHandleArray hVertices; // content really depends on DWG version.
 
     CADHandle hSeqend;
 };
@@ -559,7 +559,7 @@ public:
 /**
  * @brief The CADPolyline3DObject class
  */
-class CADPolyline3DObject : public CADEntityObject
+class CADPolyline3DObject final: public CADEntityObject
 {
 public:
     CADPolyline3DObject();
@@ -569,7 +569,7 @@ public:
 
     long nObjectsOwned;
 
-    CADHandleArray hVertexes; // content really depends on DWG version.
+    CADHandleArray hVertices; // content really depends on DWG version.
 
     CADHandle hSeqend;
 };
@@ -577,7 +577,7 @@ public:
 /**
  * @brief The CADArc class
  */
-class CADArcObject : public CADEntityObject
+class CADArcObject final: public CADEntityObject
 {
 public:
     CADArcObject();
@@ -593,7 +593,7 @@ public:
 /**
  * @brief The CADCircleObject class
  */
-class CADCircleObject : public CADEntityObject
+class CADCircleObject final: public CADEntityObject
 {
 public:
     CADCircleObject();
@@ -607,7 +607,7 @@ public:
 /**
  * @brief The CADLineObject class
  */
-class CADLineObject : public CADEntityObject
+class CADLineObject final: public CADEntityObject
 {
 public:
     CADLineObject();
@@ -638,7 +638,7 @@ protected:
 /**
  * @brief The CADBlockControlObject class
  */
-class CADBlockControlObject : public CADBaseControlObject
+class CADBlockControlObject final: public CADBaseControlObject
 {
 public:
     CADBlockControlObject();
@@ -652,7 +652,7 @@ public:
 /**
  * @brief The CADBlockHeaderObject class
  */
-class CADBlockHeaderObject : public CADBaseControlObject
+class CADBlockHeaderObject final: public CADBaseControlObject
 {
 public:
     CADBlockHeaderObject();
@@ -690,7 +690,7 @@ public:
 /**
  * @brief The CADLayerControlObject class
  */
-class CADLayerControlObject : public CADBaseControlObject
+class CADLayerControlObject final: public CADBaseControlObject
 {
 public:
     CADLayerControlObject();
@@ -705,7 +705,7 @@ public:
 /**
  * @brief The CADLayerObject class
  */
-class CADLayerObject : public CADBaseControlObject
+class CADLayerObject final: public CADBaseControlObject
 {
 public:
     CADLayerObject();
@@ -736,7 +736,7 @@ public:
 /**
  * @brief The CADLineTypeControlObject class
  */
-class CADLineTypeControlObject : public CADBaseControlObject
+class CADLineTypeControlObject final: public CADBaseControlObject
 {
 public:
     CADLineTypeControlObject();
@@ -762,7 +762,7 @@ typedef struct _dash
 /**
  * @brief The CADLineTypeObject class
  */
-class CADLineTypeObject : public CADBaseControlObject
+class CADLineTypeObject final: public CADBaseControlObject
 {
 public:
     CADLineTypeObject();
@@ -788,7 +788,7 @@ public:
 /**
  * @brief The CADPointObject class
  */
-class CADPointObject : public CADEntityObject
+class CADPointObject final: public CADEntityObject
 {
 public:
     CADPointObject();
@@ -803,7 +803,7 @@ public:
 /**
  * @brief The CADSolidObject class
  */
-class CADSolidObject : public CADEntityObject
+class CADSolidObject final: public CADEntityObject
 {
 public:
     CADSolidObject();
@@ -818,7 +818,7 @@ public:
 /**
  * @brief The CADEllipseObject class
  */
-class CADEllipseObject : public CADEntityObject
+class CADEllipseObject final: public CADEntityObject
 {
 public:
     CADEllipseObject();
@@ -835,7 +835,7 @@ public:
 /**
  * @brief The CADRayObject class
  */
-class CADRayObject : public CADEntityObject
+class CADRayObject final: public CADEntityObject
 {
 public:
     CADRayObject();
@@ -848,7 +848,7 @@ public:
 /**
  * @brief The CADXLineObject class
  */
-class CADXLineObject : public CADEntityObject
+class CADXLineObject final: public CADEntityObject
 {
 public:
     CADXLineObject();
@@ -861,7 +861,7 @@ public:
 /**
  * @brief The CADDictionaryObject class
  */
-class CADDictionaryObject : public CADBaseControlObject
+class CADDictionaryObject final: public CADBaseControlObject
 {
 public:
     CADDictionaryObject();
@@ -882,7 +882,7 @@ public:
 /**
  * @brief The CADLWPolylineObject class
  */
-class CADLWPolylineObject : public CADEntityObject
+class CADLWPolylineObject final: public CADEntityObject
 {
 public:
     CADLWPolylineObject();
@@ -893,16 +893,16 @@ public:
     double                       dfElevation;
     double                       dfThickness;
     CADVector                    vectExtrusion;
-    std::vector<CADVector>            avertVertexes;
+    std::vector<CADVector>            avertVertices;
     std::vector<double>               adfBulges;
-    std::vector<short>                adVertexesID;
+    std::vector<short>                adVerticesID;
     std::vector<std::pair<double, double>> astWidths; // start, end.
 };
 
 /**
  * @brief The CADSplineObject class
  */
-class CADSplineObject : public CADEntityObject
+class CADSplineObject final: public CADEntityObject
 {
 public:
     CADSplineObject();
@@ -1000,7 +1000,7 @@ public:
 /**
  * @brief The CADDimensionOrdinateObject class
  */
-class CADDimensionOrdinateObject : public CADDimensionObject
+class CADDimensionOrdinateObject final: public CADDimensionObject
 {
 public:
     CADDimensionOrdinateObject();
@@ -1012,7 +1012,7 @@ public:
 /**
  * @brief The CADDimensionLinearObject class
  */
-class CADDimensionLinearObject : public CADDimensionObject
+class CADDimensionLinearObject final: public CADDimensionObject
 {
 public:
     CADDimensionLinearObject();
@@ -1026,7 +1026,7 @@ public:
 /**
  * @brief The CADDimensionAlignedObject class
  */
-class CADDimensionAlignedObject : public CADDimensionObject
+class CADDimensionAlignedObject final: public CADDimensionObject
 {
 public:
     CADDimensionAlignedObject();
@@ -1051,7 +1051,7 @@ public:
 /**
  * @brief The CADDimensionAngular2LnObject class
  */
-class CADDimensionAngular2LnObject : public CADDimensionAngular3PtObject
+class CADDimensionAngular2LnObject final: public CADDimensionAngular3PtObject
 {
 public:
     CADDimensionAngular2LnObject();
@@ -1076,7 +1076,7 @@ public:
 /**
  * @brief The CADDimensionDiameterObject class
  */
-class CADDimensionDiameterObject : public CADDimensionRadiusObject
+class CADDimensionDiameterObject final: public CADDimensionRadiusObject
 {
 public:
     CADDimensionDiameterObject();
@@ -1086,7 +1086,7 @@ public:
 /**
  * @brief The CADImageObject class
  */
-class CADImageObject : public CADEntityObject
+class CADImageObject final: public CADEntityObject
 {
 public:
     CADImageObject();
@@ -1111,8 +1111,8 @@ public:
 
     short dClipBoundaryType;
 
-    long              nNumberVertexesInClipPolygon;
-    std::vector<CADVector> avertClippingPolygonVertexes;
+    long              nNumberVerticesInClipPolygon;
+    std::vector<CADVector> avertClippingPolygonVertices;
 
     CADHandle hImageDef;
     CADHandle hImageDefReactor;
@@ -1136,7 +1136,7 @@ public:
 /**
  * @brief The CADImageDefObject class
  */
-class CADImageDefObject : public CADImageDefReactorObject
+class CADImageDefObject final: public CADImageDefReactorObject
 {
 public:
     CADImageDefObject();
@@ -1154,7 +1154,7 @@ public:
 /**
  * @brief The CADMTextObject class
  */
-class CADMTextObject : public CADEntityObject
+class CADMTextObject final: public CADEntityObject
 {
 public:
     CADMTextObject();
@@ -1185,9 +1185,9 @@ public:
  */
 typedef struct _linestyle
 {
-    short          nNumSegParms;
+    short          nNumSegParams;
     std::vector<double> adfSegparms;
-    short          nAreaFillParms;
+    short          nAreaFillParams;
     std::vector<double> adfAreaFillParameters;
 } CADLineStyle;
 
@@ -1205,7 +1205,7 @@ typedef struct _mlinevertex
 /**
  * @brief The CADMLineObject class
  */
-class CADMLineObject : public CADEntityObject
+class CADMLineObject final: public CADEntityObject
 {
 public:
     CADMLineObject();
@@ -1217,9 +1217,9 @@ public:
     CADVector     vectExtrusion;
     short         dOpenClosed; // 1 open, 3 closed
     unsigned char nLinesInStyle;
-    short         nNumVertexes;
+    short         nNumVertices;
 
-    std::vector<CADMLineVertex> avertVertexes;
+    std::vector<CADMLineVertex> avertVertices;
 
     CADHandle hMLineStyle;
 };
@@ -1227,7 +1227,7 @@ public:
 /**
  * @brief The CAD3DFaceObject class
  */
-class CAD3DFaceObject : public CADEntityObject
+class CAD3DFaceObject final: public CADEntityObject
 {
 public:
     CAD3DFaceObject();
@@ -1242,16 +1242,16 @@ public:
 /**
  * @brief The CADPolylinePFaceObject class
  */
-class CADPolylinePFaceObject : public CADEntityObject
+class CADPolylinePFaceObject final: public CADEntityObject
 {
 public:
     CADPolylinePFaceObject();
     virtual ~CADPolylinePFaceObject(){}
 
-    short             nNumVertexes;
+    short             nNumVertices;
     short             nNumFaces;
     long              nObjectsOwned;
-    std::vector<CADHandle> hVertexes; // content really depends on DWG version.
+    std::vector<CADHandle> hVertices; // content really depends on DWG version.
     CADHandle         hSeqend;
 };
 
@@ -1259,7 +1259,7 @@ public:
 /**
  * @brief The CADHatchObject class TODO: not completed
  */
-class CADHatchObject : public CADEntityObject
+class CADHatchObject final: public CADEntityObject
 {
 public:
     typedef struct
@@ -1303,7 +1303,7 @@ public:
 /**
  * @brief The CADXRecordObject class
  */
-class CADXRecordObject : public CADBaseControlObject
+class CADXRecordObject final: public CADBaseControlObject
 {
 public:
     CADXRecordObject();

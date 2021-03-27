@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -216,15 +216,15 @@ long CADHandle::getAsLong() const
 
 long CADHandle::getAsLong(const std::vector<unsigned char>& handle)
 {
-    long result = 0;
+    unsigned long result = 0;
     if( handle.empty() )
         return result;
     size_t copySize = handle.size();
     if( copySize > sizeof(long) )
         copySize = sizeof(long);
-    memcpy( &result, handle.data(), copySize );
-    SwapEndianness( result, copySize );
-    return result;
+    for( size_t i = 0; i < copySize; ++i )
+        result = result * 256U + handle[i];
+    return static_cast<long>(result);
 }
 
 

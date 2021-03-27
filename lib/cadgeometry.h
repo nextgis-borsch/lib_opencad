@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -92,7 +92,7 @@ public:
 
     enum GeometryType getType() const;
     double            getThickness() const;
-    void              setThickness( double thicknes );
+    void              setThickness( double thickness );
     RGBColor          getColor() const;
     void              setColor( RGBColor color ); // TODO: In 2004+ ACI is not the only way to set the color.
 
@@ -109,7 +109,7 @@ protected:
 
     std::vector<std::string>    asEED;
     enum GeometryType geometryType;
-    double            thickness;
+    double            m_thickness;
     RGBColor          geometry_color;
 };
 
@@ -189,7 +189,7 @@ public:
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
-    std::vector<CADVector> vertexes;
+    std::vector<CADVector> vertices;
 };
 
 /**
@@ -347,8 +347,8 @@ public:
     bool getWeight() const;
     void setWeight( bool value );
 
-    double getFitTollerance() const;
-    void   setFitTollerance( double value );
+    double getFitTolerance() const;
+    void   setFitTolerance( double value );
 
     long getDegree() const;
     void setDegree( long value );
@@ -360,7 +360,7 @@ protected:
     bool   rational;
     bool   closed;
     bool   weight;
-    double fitTollerance;
+    double fitTolerance;
     long   degree;
 
     std::vector<double>    ctrlPointsWeight;
@@ -553,7 +553,7 @@ public:
     virtual void print() const override;
     virtual void transform( const Matrix& matrix ) override;
 protected:
-    std::vector<CADVector> vertexes;
+    std::vector<CADVector> vertices;
 };
 
 /**
@@ -592,7 +592,7 @@ protected:
     //char dJust;
     bool              opened; // 1 == open, 0 == close
     // TODO: do we need more properties here?
-    std::vector<CADVector> avertVertexes;
+    std::vector<CADVector> avertVertices;
 };
 
 /**

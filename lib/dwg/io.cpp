@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
 #include "io.h"
 
 #include <iostream>
+#include <cstdint>
 #include <cstring>
 
 const size_t DWGConstants::SentinelLength = 16;
@@ -256,10 +257,10 @@ double CADBuffer::ReadBITDOUBLE()
 
             m_nBitOffsetFromStart += 64;
 
-            void   * ptr    = aDoubleBytes;
-            double * result = static_cast< double *> ( ptr );
-
-            return * result;
+            double result;
+            memcpy(&result, aDoubleBytes, sizeof(result));
+            FromLSB(result);
+            return result;
         }
 
         case BITDOUBLE_ONE_VALUE:
@@ -337,12 +338,13 @@ short CADBuffer::ReadRAWSHORT()
             break;
     }
 
-    void  * ptr    = aShortBytes;
-    short * result = static_cast<short *>(ptr);
+    int16_t result;
+    memcpy(&result, aShortBytes, sizeof(result));
+    FromLSB(result);
 
     m_nBitOffsetFromStart += 16;
 
-    return * result;
+    return result;
 }
 
 double CADBuffer::ReadRAWDOUBLE()
@@ -384,12 +386,13 @@ double CADBuffer::ReadRAWDOUBLE()
             break;
     }
 
-    void   * ptr    = aDoubleBytes;
-    double * result = static_cast<double *>(ptr);
+    double result;
+    memcpy(&result, aDoubleBytes, sizeof(result));
+    FromLSB(result);
 
     m_nBitOffsetFromStart += 64;
 
-    return * result;
+    return result;
 }
 
 int CADBuffer::ReadRAWLONG()
@@ -423,12 +426,13 @@ int CADBuffer::ReadRAWLONG()
             break;
     }
 
-    void * ptr    = aLongBytes;
-    int  * result = static_cast<int *>(ptr);
+    int32_t result;
+    memcpy(&result, aLongBytes, sizeof(result));
+    FromLSB(result);
 
     m_nBitOffsetFromStart += 32;
 
-    return * result;
+    return result;
 }
 
 bool CADBuffer::ReadBIT()
@@ -475,10 +479,11 @@ short CADBuffer::ReadBITSHORT()
 
             m_nBitOffsetFromStart += 16;
 
-            void  * ptr    = aShortBytes;
-            short * result = static_cast < short * > ( ptr );
+            int16_t result;
+            memcpy(&result, aShortBytes, sizeof(result));
+            FromLSB(result);
 
-            return * result;
+            return result;
         }
 
         case BITSHORT_UNSIGNED_CHAR:
@@ -637,7 +642,6 @@ long CADBuffer::ReadMCHAR()
 
 unsigned int CADBuffer::ReadMSHORT()
 {
-    unsigned int  result = 0;
     unsigned char aMShortBytes[8]; // 8 bytes is maximum.
 
     // TODO: this function doesnot support MSHORTS longer than 4 bytes. ODA says
@@ -658,7 +662,7 @@ unsigned int CADBuffer::ReadMSHORT()
     {
         aMShortBytes[0] &= binary( 01111111 ); // drop high order flag bit.
     }
-    else if ( MShortBytesCount == 4 )
+    else
     {
         aMShortBytes[0] &= binary( 01111111 );
         aMShortBytes[2] &= binary( 01111111 );
@@ -668,8 +672,16 @@ unsigned int CADBuffer::ReadMSHORT()
         aMShortBytes[1] |= ( aMShortBytes[0] << 7 );
         aMShortBytes[0] = ( aMShortBytes[0] >> 1 );
     }
-    SwapEndianness( aMShortBytes, MShortBytesCount ); // MSB to LSB
-    memcpy( & result, aMShortBytes, MShortBytesCount );
+    unsigned int result;
+    if( MShortBytesCount == 2 )
+    {
+        result = (aMShortBytes[0] << 8) | aMShortBytes[1];
+    }
+    else
+    {
+        result = (static_cast<unsigned>(aMShortBytes[0]) << 24) |
+                 (aMShortBytes[1] << 16) | (aMShortBytes[2] << 8) | aMShortBytes[3];
+    }
     return result;
 }
 
@@ -696,10 +708,10 @@ double CADBuffer::ReadBITDOUBLEWD(double defaultvalue )
             aDefaultValueBytes[2] = ReadCHAR();
             aDefaultValueBytes[3] = ReadCHAR();
 
-            void   * ptr    = aDefaultValueBytes;
-            double * result = static_cast< double *> ( ptr );
-
-            return * result;
+            double result;
+            memcpy(&result, aDefaultValueBytes, sizeof(result));
+            FromLSB(result);
+            return result;
         }
 
         case BITDOUBLEWD_6BYTES_PATCHED:
@@ -711,10 +723,10 @@ double CADBuffer::ReadBITDOUBLEWD(double defaultvalue )
             aDefaultValueBytes[2] = ReadCHAR();
             aDefaultValueBytes[3] = ReadCHAR();
 
-            void   * ptr    = aDefaultValueBytes;
-            double * result = static_cast< double *> ( ptr );
-
-            return * result;
+            double result;
+            memcpy(&result, aDefaultValueBytes, sizeof(result));
+            FromLSB(result);
+            return result;
         }
 
         case BITDOUBLEWD_FULL_RD:
@@ -728,10 +740,10 @@ double CADBuffer::ReadBITDOUBLEWD(double defaultvalue )
             aDefaultValueBytes[6] = ReadCHAR();
             aDefaultValueBytes[7] = ReadCHAR();
 
-            void   * ptr    = aDefaultValueBytes;
-            double * result = static_cast< double *> ( ptr );
-
-            return * result;
+            double result;
+            memcpy(&result, aDefaultValueBytes, sizeof(result));
+            FromLSB(result);
+            return result;
         }
     }
 
@@ -800,10 +812,10 @@ int CADBuffer::ReadBITLONG()
 
             m_nBitOffsetFromStart += 32;
 
-            void * ptr    = aLongBytes;
-            int  * result = static_cast < int * > ( ptr );
-
-            return * result;
+            int32_t result;
+            memcpy(&result, aLongBytes, sizeof(result));
+            FromLSB(result);
+            return result;
         }
 
         case BITLONG_UNSIGNED_CHAR:
@@ -837,6 +849,11 @@ int CADBuffer::ReadBITLONG()
 void CADBuffer::SkipTV()
 {
     short stringLength = ReadBITSHORT();
+    if( stringLength < 0 )
+    {
+        std::cerr << "Negative string length" << std::endl;
+        return;
+    }
     m_nBitOffsetFromStart += size_t( stringLength * 8 );
 }
 

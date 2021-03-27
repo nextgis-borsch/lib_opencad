@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,10 @@
 #define BITDOUBLEWD_6BYTES_PATCHED 0x2
 #define BITDOUBLEWD_FULL_RD        0x3
 
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#define CAD_MSB
+#endif
+
 namespace DWGConstants {
 extern const size_t SentinelLength;
 extern const char * HeaderVariablesStart;
@@ -81,10 +85,24 @@ static const char * DWGSecondFileHeaderEnd
 
 // TODO: probably it would be better to have no dependencies on <algorithm>.
 template<typename T, typename S>
-inline void SwapEndianness( T&& object, S&& size )
+inline void SwapEndianness( T&& object, S size )
 {
-    std::reverse( ( char * ) &object, ( char * ) &object + size );
+    std::reverse( reinterpret_cast<char*>(&object),
+                  reinterpret_cast<char*>(&object) + size );
 }
+
+#ifdef CAD_MSB
+template<typename T>
+inline void FromLSB( T&& object )
+{
+    SwapEndianness(object, sizeof(T));
+}
+#else
+template<typename T>
+inline void FromLSB( T&& )
+{
+}
+#endif
 
 /*
  * Method taken from here: http://stackoverflow.com/a/2611850

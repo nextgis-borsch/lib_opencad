@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016-2018 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
 
 #include "cadobjects.h"
 
+#include <limits>
 #include <math.h>
 #include <algorithm>
 
@@ -801,7 +802,7 @@ CADImageObject::CADImageObject() :
     dFade( 0 ),
     bClipMode( false ),
     dClipBoundaryType( 0 ),
-    nNumberVertexesInClipPolygon( 0 )
+    nNumberVerticesInClipPolygon( 0 )
 {
 }
 
@@ -862,7 +863,7 @@ CADMLineObject::CADMLineObject() :
     dJust( 0 ),
     dOpenClosed( 0 ),
     nLinesInStyle( 0 ),
-    nNumVertexes( 0 )
+    nNumVertices( 0 )
 {
 }
 
@@ -884,7 +885,7 @@ CAD3DFaceObject::CAD3DFaceObject() :
 
 CADPolylinePFaceObject::CADPolylinePFaceObject() :
     CADEntityObject(POLYLINE_PFACE),
-    nNumVertexes( 0 ),
+    nNumVertices( 0 ),
     nNumFaces( 0 ),
     nObjectsOwned( 0 )
 {
