@@ -44,7 +44,7 @@ public:
     CADVector( double dx, double dy );
     CADVector( double dx, double dy, double dz );
     CADVector( const CADVector& other );
-    friend bool operator==( const CADVector& first, const CADVector& second );
+    friend OCAD_EXTERN bool operator==( const CADVector& first, const CADVector& second );
     CADVector& operator=( const CADVector& second );
     double getX() const;
     void   setX( double value );
