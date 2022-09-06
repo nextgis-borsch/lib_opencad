@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2022 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -99,8 +99,8 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     readSize = pFileIO->Read( &dHeaderVarsSectionLength, dSizeOfSectionSize );
     const auto dHeaderVarsSectionLengthOriginal = dHeaderVarsSectionLength;
     FromLSB(dHeaderVarsSectionLength);
-        DebugMsg( "Header variables section length: %d\n",
-                  static_cast<int>(dHeaderVarsSectionLength) );
+    DebugMsg( "Header variables section length: %d\n",
+              static_cast<int>(dHeaderVarsSectionLength) );
     if(readSize != dSizeOfSectionSize || dHeaderVarsSectionLength > 65536) //NOTE: maybe header section may be bigger
     {
         DebugMsg( "File is corrupted (HEADER_VARS section length too big)" );
@@ -184,8 +184,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( CADHeader::LUPREC, buffer.ReadBITSHORT() );        // 4
         oHeader.addValue( CADHeader::AUNITS, buffer.ReadBITSHORT() );        // 5
         oHeader.addValue( CADHeader::AUPREC, buffer.ReadBITSHORT() );        // 6
-    }
-    else
+    } else
     {
         for( char i = 0; i < 6; ++i )
             buffer.SkipBITSHORT();
@@ -248,8 +247,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( CADHeader::CELTSCALE, buffer.ReadBITDOUBLE() );// 12
 
         oHeader.addValue( CADHeader::MENU, buffer.ReadTV() );
-    }
-    else
+    } else
     {
         for( char i = 0; i < 12; ++i )
             buffer.SkipBITDOUBLE();
@@ -272,8 +270,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 
     oHeader.addValue( CADHeader::CECOLOR, buffer.ReadBITSHORT() );
 
-    oHeader.addValue( CADHeader::HANDSEED, buffer.ReadHANDLE() ); 
-
+    oHeader.addValue( CADHeader::HANDSEED, buffer.ReadHANDLE() );
 
     oHeader.addValue( CADHeader::CLAYER, buffer.ReadHANDLE() );
     oHeader.addValue( CADHeader::TEXTSTYLE, buffer.ReadHANDLE() );
@@ -494,8 +491,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
 
         oHeader.addValue( CADHeader::DIMLWD, buffer.ReadBITSHORT() );
         oHeader.addValue( CADHeader::DIMLWE, buffer.ReadBITSHORT() );
-    }
-    else
+    } else
     {
         buffer.SkipTV();
         buffer.SkipTV();
@@ -584,8 +580,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
     {
         oHeader.addValue( CADHeader::TSTACKALIGN, buffer.ReadBITSHORT() );
         oHeader.addValue( CADHeader::TSTACKSIZE,  buffer.ReadBITSHORT() );
-    }
-    else
+    } else
     {
         buffer.SkipBITSHORT();
         buffer.SkipBITSHORT();
@@ -648,8 +643,7 @@ int DWGFileR2000::ReadHeader( OpenOptions eOptions )
         oHeader.addValue( UNKNOWN12, buffer.ReadBITSHORT() );
         oHeader.addValue( UNKNOWN13, buffer.ReadBITSHORT() );
         oHeader.addValue( UNKNOWN14, buffer.ReadBITSHORT() );
-    }
-    else
+    } else
     {
         buffer.SkipHANDLE();
         buffer.SkipHANDLE();
@@ -822,7 +816,7 @@ int DWGFileR2000::CreateFileMap()
             {
                 if( (tmpOffset.first >= 0 &&
                      std::numeric_limits<long>::max() - tmpOffset.first > previousObjHandleOffset.first) ||
-                    (tmpOffset.first < 0 && 
+                    (tmpOffset.first < 0 &&
                      std::numeric_limits<long>::min() - tmpOffset.first <= previousObjHandleOffset.first) )
                 {
                     previousObjHandleOffset.first += tmpOffset.first;
@@ -1597,16 +1591,16 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             case 0: // String
             {
                 if( citer->acData.size() > 1 )
-            {
-                unsigned char nStrSize = citer->acData[1];
-                // +2 = skip CodePage, no idea how to use it anyway
-
-                if(nStrSize > 0)
                 {
-                    for( size_t i = 0; i < nStrSize &&
-                            i + 4 < citer->acData.size(); ++i )
+                    unsigned char nStrSize = citer->acData[1];
+                    // +2 = skip CodePage, no idea how to use it anyway
+
+                    if(nStrSize > 0)
                     {
-                        sEED += citer->acData[i + 4];
+                        for( size_t i = 0; i < nStrSize &&
+                            i + 4 < citer->acData.size(); ++i )
+                        {
+                            sEED += citer->acData[i + 4];
                         }
                     }
                 }
@@ -1621,7 +1615,7 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
             {
                 if( citer->acData.size() > 1 )
                 {
-                sEED += citer->acData[1] == 0 ? '{' : '}';
+                    sEED += citer->acData[1] == 0 ? '{' : '}';
                 }
                 break;
             }
@@ -1675,9 +1669,9 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
                 double dfX = 0, dfY = 0, dfZ = 0;
                 if(citer->acData.size() > 24)
                 {
-                memcpy( & dfX, citer->acData.data() + 1, 8 );
-                memcpy( & dfY, citer->acData.data() + 9, 8 );
-                memcpy( & dfZ, citer->acData.data() + 17, 8 );
+                    memcpy( & dfX, citer->acData.data() + 1, 8 );
+                    memcpy( & dfY, citer->acData.data() + 9, 8 );
+                    memcpy( & dfZ, citer->acData.data() + 17, 8 );
                 }
                 sEED += std::to_string( dfX );
                 sEED += ';';
@@ -1755,14 +1749,13 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
                             break;
                         }
 
-                        CADAttrib * attrib = static_cast<CADAttrib *>(
-                                GetGeometry( iLayerIndex, dCurrentEntHandle ) );
-
+                        auto geometry = GetGeometry( iLayerIndex, dCurrentEntHandle );
+                        CADAttrib * attrib = dynamic_cast<CADAttrib *>(geometry);
                         if( attrib )
                         {
                             blockRefAttributes.push_back( CADAttrib( * attrib ) );
-                            delete attrib;
                         }
+                        delete geometry;
                         delete attDefObj;
                         break;
                     }
@@ -1774,14 +1767,13 @@ CADGeometry * DWGFileR2000::GetGeometry( size_t iLayerIndex, long dHandle, long 
                         else
                             dCurrentEntHandle = attDefObj->stChed.hNextEntity.getAsLong( attDefObj->stCed.hObjectHandle );
 
-                        CADAttrib * attrib = static_cast<CADAttrib *>(
-                                GetGeometry( iLayerIndex, dCurrentEntHandle ) );
-
+                        auto geometry = GetGeometry( iLayerIndex, dCurrentEntHandle );
+                        CADAttrib * attrib = dynamic_cast<CADAttrib *>(geometry);
                         if( attrib )
                         {
                             blockRefAttributes.push_back( CADAttrib( * attrib ) );
-                            delete attrib;
                         }
+                        delete geometry;
                         delete attDefObj;
                     }
                     else
@@ -2403,8 +2395,8 @@ CADLWPolylineObject * DWGFileR2000::getLWPolyLine(unsigned int dObjectSize,
         }
         if( nBulges < 100000 )
         {
-        polyline->adfBulges.reserve( static_cast<size_t>(nBulges) );
-    }
+            polyline->adfBulges.reserve( static_cast<size_t>(nBulges) );
+        }
     }
 
     // TODO: tell ODA that R2000 contains nNumWidths flag
@@ -2418,8 +2410,8 @@ CADLWPolylineObject * DWGFileR2000::getLWPolyLine(unsigned int dObjectSize,
         }
         if( nNumWidths < 100000 )
         {
-        polyline->astWidths.reserve( static_cast<size_t>(nNumWidths) );
-    }
+            polyline->astWidths.reserve( static_cast<size_t>(nNumWidths) );
+        }
     }
 
     if( dataFlag & 512 )
@@ -3094,7 +3086,7 @@ CADMLineObject * DWGFileR2000::getMLine(unsigned int dObjectSize,
             return nullptr;
         }
         for( unsigned char j = 0; j < mline->nLinesInStyle; ++j )
-        {            
+        {
             CADLineStyle   stLStyle;
             stLStyle.nNumSegParams = buffer.ReadBITSHORT();
             if( stLStyle.nNumSegParams > 0 ) // Or return null here?
@@ -3762,7 +3754,7 @@ void DWGFileR2000::fillCommonEntityHandleData(CADEntityObject * pEnt,
     // TODO: Need some reasonable nNumReactors limits.
     if(pEnt->stCed.nNumReactors < 0 || pEnt->stCed.nNumReactors > 5000)
     {
-        // Something wrong occured
+        // Something wrong occurred
         return;
     }
     for( long i = 0; i < pEnt->stCed.nNumReactors; ++i )
@@ -3865,7 +3857,7 @@ CADDictionary DWGFileR2000::GetNOD()
                     GetObject( spoNamedDictObj->hItemHandles[i].getAsLong() ) );
 
         if( spoDictRecord == nullptr )
-            continue; // Skip unreaded objects
+            continue; // Skip unread objects
 
         if( spoDictRecord->getType() == CADObject::DICTIONARY )
         {
