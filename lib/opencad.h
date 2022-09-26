@@ -52,22 +52,18 @@
 
 #ifndef OCAD_EXTERN
 
-#ifdef OCAD_STATIC
-  #define OCAD_EXTERN extern
+#if defined (_MSC_VER)
+#  ifdef OCAD_EXPORTS
+#    define OCAD_EXTERN __declspec(dllexport) // extern
+#  else
+#    define OCAD_EXTERN __declspec(dllimport) // extern
+#  endif
 #else
-#  if defined (_MSC_VER)
-#    ifdef OCAD_EXPORTS
-#      define OCAD_EXTERN __declspec(dllexport) // extern 
-#    else
-#      define OCAD_EXTERN __declspec(dllimport) // extern 
-#    endif
-#   else
-#     if defined(__GNUC__) && __GNUC__ >= 4
-#       define OCAD_EXTERN __attribute__((visibility("default")))
-#     else
-#       define OCAD_EXTERN extern
-#     endif
-#   endif
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#    define OCAD_EXTERN __attribute__((visibility("default")))
+#  else
+#    define OCAD_EXTERN extern
+#  endif
 #endif
 
 #endif // OCAD_EXTERN

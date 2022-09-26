@@ -90,6 +90,7 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   add_definitions(-D_DEBUG)
+  set(CMAKE_CXX_FLAGS "-g ${CMAKE_CXX_FLAGS}")
 endif()
 
 configure_file(${CMAKE_MODULE_PATH}/uninstall.cmake.in ${CMAKE_BINARY_DIR}/cmake_uninstall.cmake IMMEDIATE @ONLY)
