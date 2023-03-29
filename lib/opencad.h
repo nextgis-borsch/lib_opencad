@@ -53,7 +53,7 @@
 #ifndef OCAD_EXTERN
 
 #ifdef OCAD_STATIC
-  #define OCAD_EXTERN extern
+  #define OCAD_EXTERN
 #else
 #  if defined (_MSC_VER)
 #    ifdef OCAD_EXPORTS
@@ -65,7 +65,7 @@
 #     if defined(__GNUC__) && __GNUC__ >= 4
 #       define OCAD_EXTERN __attribute__((visibility("default")))
 #     else
-#       define OCAD_EXTERN extern
+#       define OCAD_EXTERN
 #     endif
 #   endif
 #endif
