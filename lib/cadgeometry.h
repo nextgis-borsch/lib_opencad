@@ -8,7 +8,7 @@
  *  The MIT License (MIT)
  *
  *  Copyright (c) 2016 Alexandr Borzykh
- *  Copyright (c) 2016-2021 NextGIS, <info@nextgis.com>
+ *  Copyright (c) 2016-2022 NextGIS, <info@nextgis.com>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -427,6 +427,13 @@ public:
     {
         NONE = 0, CENTIMETER = 2, INCH = 5
     };
+
+    static bool IsValidResolutionUnit(int nVal)
+    {
+        return nVal == ResolutionUnit::NONE ||
+               nVal == ResolutionUnit::CENTIMETER ||
+               nVal == ResolutionUnit::INCH;
+    }
 
     CADImage();
     virtual ~CADImage(){}
